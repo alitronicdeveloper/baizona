@@ -7,6 +7,24 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || ""
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ""
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
+const SketchHomeIcon = ({ size = 20, color = "#000" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 11 L12 3 L21 11" />
+    <path d="M5 11 V20 H9 V14 H15 V20 H19 V11" />
+    <path d="M8 20 V15" />
+    <path d="M16 20 V15" />
+  </svg>
+)
+
+const SketchShopIcon = ({ size = 20, color = "#000" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 10 L12 4 L20 10" />
+    <path d="M4 10 H20 V20 H4 Z" />
+    <path d="M7 20 V14 H10 V20" />
+    <path d="M14 20 V14 H17 V20" />
+  </svg>
+)
+
 // ============================================
 // SAMPLE DATA
 // ============================================
@@ -552,9 +570,11 @@ const CartPage = ({ onClose }) => {
 }
 
 // USER ACCOUNT PAGE (Sign in with Phone and Name only)
-const UserAccountPage = ({ user, onLogin, onLogout, userOrders, onViewProduct }) => {
+const UserAccountPage = ({ user, onLogin, onLogout, userOrders, onViewProduct, onBack }) => {
   const [isLogin, setIsLogin] = useState(!user)
   const [form, setForm] = useState({ name: "", phone: "" })
+  const [isEditing, setIsEditing] = useState(false)
+  const [editForm, setEditForm] = useState({ name: user?.name || "", phone: user?.phone || "" })
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
   useEffect(() => {
@@ -563,7 +583,17 @@ const UserAccountPage = ({ user, onLogin, onLogout, userOrders, onViewProduct })
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  useEffect(() => {
+    if (user) {
+      setEditForm({ name: user.name || "", phone: user.phone || "" })
+    }
+  }, [user])
+
   const handleGoBack = () => {
+    if (typeof onBack === "function") {
+      onBack()
+      return
+    }
     if (window.history.length > 1) {
       window.history.back()
     }
@@ -582,6 +612,19 @@ const UserAccountPage = ({ user, onLogin, onLogout, userOrders, onViewProduct })
     }
   }
 
+  const handleUpdateProfile = (e) => {
+    e.preventDefault()
+    if (editForm.name && editForm.phone) {
+      const updatedUser = { ...user, name: editForm.name, phone: editForm.phone }
+      localStorage.setItem("baizona_user", JSON.stringify(updatedUser))
+      onLogin(updatedUser)
+      showToast("Taarifa zako zimehifadhiwa")
+      setIsEditing(false)
+    } else {
+      showToast("Jaza jina na namba ya simu!", "error")
+    }
+  }
+
   const handleLogout = () => {
     localStorage.removeItem("baizona_user")
     onLogout()
@@ -592,8 +635,8 @@ const UserAccountPage = ({ user, onLogin, onLogout, userOrders, onViewProduct })
     return (
       <div style={{ minHeight: "100vh", background: "#f5f5f5", paddingBottom: isMobile ? "60px" : "0" }}>
         <div style={{ background: "white", padding: "12px 16px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 100 }}>
-          <div><div style={{ fontSize: "16px", fontWeight: "bold", color: "#ff6b00" }}>Baizona</div><div style={{ fontSize: "8px", color: "#999" }}>chimbo la machimbo</div></div>
-          <button onClick={handleGoBack} style={{ background: "#f5f5f5", border: "none", padding: "6px 16px", borderRadius: "20px", cursor: "pointer" }}>← Rudi</button>
+          <div><div style={{ fontSize: "16px", fontWeight: "bold", color: "#000" }}>Baizona</div><div style={{ fontSize: "8px", color: "#333" }}>chimbo la machimbo</div></div>
+          <button onClick={handleGoBack} style={{ background: "#f5f5f5", border: "none", padding: "6px 16px", borderRadius: "20px", cursor: "pointer", color: "#000" }}>← Rudi</button>
         </div>
 
         <div style={{ padding: "16px", maxWidth: "500px", margin: "0 auto" }}>
@@ -601,12 +644,35 @@ const UserAccountPage = ({ user, onLogin, onLogout, userOrders, onViewProduct })
             <div style={{ width: "80px", height: "80px", background: "#ff6b00", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: "36px", color: "white" }}>
               {user.name?.charAt(0).toUpperCase()}
             </div>
-            <h3 style={{ fontSize: "20px", marginBottom: "8px" }}>{user.name}</h3>
-            <p style={{ fontSize: "14px", color: "#666", marginBottom: "16px" }}>📞 {user.phone}</p>
+            <h3 style={{ fontSize: "20px", marginBottom: "8px", color: "#000" }}>{user.name}</h3>
+            <p style={{ fontSize: "14px", color: "#111", marginBottom: "16px" }}>📞 {user.phone}</p>
             <button onClick={handleLogout} style={{ padding: "10px 24px", background: "#ef4444", color: "white", border: "none", borderRadius: "25px", cursor: "pointer" }}>Ondoka Akaunti</button>
           </div>
 
-          <h3 style={{ fontSize: "16px", marginBottom: "12px" }}>📋 Historia ya Maagizo</h3>
+          <div style={{ background: "white", borderRadius: "16px", padding: "20px", marginBottom: "20px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+              <h3 style={{ fontSize: "16px", color: "#000", margin: 0 }}>✍️ Hariri Taarifa</h3>
+              <button onClick={() => setIsEditing(prev => !prev)} style={{ background: "none", border: "1px solid #ff6b00", color: "#ff6b00", padding: "8px 14px", borderRadius: "20px", cursor: "pointer" }}>
+                {isEditing ? "Funga" : "Hariri"}
+              </button>
+            </div>
+            {isEditing ? (
+              <form onSubmit={handleUpdateProfile}>
+                <div style={{ display: "grid", gap: "12px", marginBottom: "12px" }}>
+                  <input type="text" value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} placeholder="Jina lako" style={{ width: "100%", padding: "12px", borderRadius: "12px", border: "1px solid #ddd", fontSize: "14px", color: "#000" }} required />
+                  <input type="tel" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} placeholder="Namba ya simu" style={{ width: "100%", padding: "12px", borderRadius: "12px", border: "1px solid #ddd", fontSize: "14px", color: "#000" }} required />
+                </div>
+                <button type="submit" style={{ width: "100%", padding: "12px", background: "#ff6b00", border: "none", borderRadius: "14px", color: "white", fontWeight: "bold", cursor: "pointer" }}>Hifadhi Taarifa</button>
+              </form>
+            ) : (
+              <div style={{ color: "#444", fontSize: "14px" }}>
+                <div style={{ marginBottom: "8px" }}><strong>Jina:</strong> {user.name}</div>
+                <div><strong>Simu:</strong> {user.phone}</div>
+              </div>
+            )}
+          </div>
+
+          <h3 style={{ fontSize: "16px", marginBottom: "12px", color: "#000" }}>📋 Historia ya Maagizo</h3>
           {userOrders.length === 0 ? (
             <div style={{ background: "white", borderRadius: "12px", padding: "40px", textAlign: "center" }}>
               <div style={{ fontSize: "50px", marginBottom: "12px" }}>📭</div>
@@ -642,20 +708,20 @@ const UserAccountPage = ({ user, onLogin, onLogout, userOrders, onViewProduct })
   return (
     <div style={{ minHeight: "100vh", background: "#f5f5f5", paddingBottom: isMobile ? "60px" : "0" }}>
       <div style={{ background: "white", padding: "12px 16px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 100 }}>
-        <div><div style={{ fontSize: "16px", fontWeight: "bold", color: "#ff6b00" }}>Baizona</div><div style={{ fontSize: "8px", color: "#999" }}>chimbo la machimbo</div></div>
-        <button onClick={handleGoBack} style={{ background: "#f5f5f5", border: "none", padding: "6px 16px", borderRadius: "20px", cursor: "pointer" }}>← Rudi</button>
+        <div><div style={{ fontSize: "16px", fontWeight: "bold", color: "#000" }}>Baizona</div><div style={{ fontSize: "8px", color: "#333" }}>chimbo la machimbo</div></div>
+        <button onClick={handleGoBack} style={{ background: "#f5f5f5", border: "none", padding: "6px 16px", borderRadius: "20px", cursor: "pointer", color: "#000" }}>← Rudi</button>
       </div>
 
       <div style={{ padding: "20px", maxWidth: "400px", margin: "0 auto" }}>
         <div style={{ background: "white", borderRadius: "16px", padding: "32px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
           <div style={{ textAlign: "center", marginBottom: "24px" }}>
             <div style={{ width: "60px", height: "60px", background: "#ff6b00", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", fontSize: "30px", color: "white" }}>👤</div>
-            <h2 style={{ fontSize: "22px", marginBottom: "8px" }}>Karibu!</h2>
-            <p style={{ fontSize: "13px", color: "#666" }}>Ingiza jina na namba yako ya simu</p>
+            <h2 style={{ fontSize: "22px", marginBottom: "8px", color: "#000" }}>Karibu!</h2>
+            <p style={{ fontSize: "13px", color: "#111" }}>Ingiza jina na namba yako ya simu</p>
           </div>
           <form onSubmit={handleLogin}>
-            <input type="text" placeholder="Jina lako" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{ width: "100%", padding: "14px", marginBottom: "12px", borderRadius: "10px", border: "1px solid #ddd", fontSize: "14px" }} required />
-            <input type="tel" placeholder="Namba ya simu (WhatsApp)" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} style={{ width: "100%", padding: "14px", marginBottom: "20px", borderRadius: "10px", border: "1px solid #ddd", fontSize: "14px" }} required />
+            <input type="text" placeholder="Jina lako" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={{ width: "100%", padding: "14px", marginBottom: "12px", borderRadius: "10px", border: "1px solid #ddd", fontSize: "14px", color: "#000" }} required />
+            <input type="tel" placeholder="Namba ya simu (WhatsApp)" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} style={{ width: "100%", padding: "14px", marginBottom: "20px", borderRadius: "10px", border: "1px solid #ddd", fontSize: "14px", color: "#000" }} required />
             <button type="submit" style={{ width: "100%", padding: "14px", background: "#ff6b00", color: "white", border: "none", borderRadius: "10px", fontWeight: "bold", fontSize: "16px", cursor: "pointer" }}>Ingia / Jiunge</button>
           </form>
         </div>
@@ -840,6 +906,7 @@ export default function App() {
         onLogout={() => setUser(null)} 
         userOrders={userOrders}
         onViewProduct={handleViewProduct}
+        onBack={() => setCurrentPage("home")}
       />
     )
   }
@@ -857,15 +924,10 @@ export default function App() {
                 <div style={{ fontSize: "10px", color: "#999" }}>chimbo la machimbo</div>
               </div>
               <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
-                <button onClick={() => { setCurrentPage("home"); setShowCart(false) }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>🏠 Nyumbani</button>
-                <button onClick={() => { setCurrentPage("shops"); setShopSearchQuery("") }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>🏪 Machimbo</button>
+                <button onClick={() => { setCurrentPage("home"); setShowCart(false) }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", color: "#000" }}><SketchHomeIcon size={18} /> Nyumbani</button>
+                <button onClick={() => { setCurrentPage("shops"); setShopSearchQuery("") }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", color: "#000" }}><SketchShopIcon size={18} /> Machimbo</button>
                 <button onClick={() => { setCurrentPage("agizaChina"); setAgizaChinaSearchQuery("") }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontWeight: "bold", color: "#ff6b00" }}>🇨🇳 Agiza China</button>
-                <div onClick={() => setShowCart(true)} style={{ position: "relative", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
-                  <span>🛒</span>
-                  {getTotalItems() > 0 && <span style={{ position: "absolute", top: "-8px", right: "-12px", background: "#ff6b00", color: "white", fontSize: "10px", borderRadius: "50%", width: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
-                  <span style={{ fontSize: "14px" }}>Kikapu</span>
-                </div>
-                <button onClick={() => setCurrentPage("account")} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+                <button onClick={() => setCurrentPage("account")} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", color: "#000" }}>
                   👤 {user ? user.name?.split(" ")[0] : "Akaunti"}
                 </button>
               </div>
@@ -885,10 +947,6 @@ export default function App() {
                 <input type="text" placeholder="🔍 Tafuta..." value={agizaChinaSearchQuery} onChange={e => setAgizaChinaSearchQuery(e.target.value)} style={{ width: "100%", padding: "6px 12px", border: "2px solid #ff6b00", borderRadius: "25px", fontSize: "11px" }} />
               </div>
               <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                <div onClick={() => setShowCart(true)} style={{ position: "relative", cursor: "pointer" }}>
-                  <span>🛒</span>
-                  {getTotalItems() > 0 && <span style={{ position: "absolute", top: "-6px", right: "-10px", background: "#ff6b00", color: "white", fontSize: "8px", borderRadius: "50%", width: "14px", height: "14px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
-                </div>
                 <button onClick={() => setCurrentPage("account")} style={{ background: "none", border: "none", cursor: "pointer" }}>
                   👤
                 </button>
@@ -898,7 +956,7 @@ export default function App() {
         )}
 
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" }}>
-          <h1 style={{ fontSize: "28px", textAlign: "center", marginBottom: "20px" }}>🇨🇳 Agiza Kutoka China</h1>
+          <h1 style={{ fontSize: "28px", textAlign: "center", marginBottom: "20px", color: "#000" }}>🇨🇳 Agiza Kutoka China</h1>
           {filteredAgizaChina.map(company => (
             <AgizaChinaCard key={company.id} company={company} onClick={() => handleViewAgizaChinaCompany(company)} onViewProduct={handleViewProduct} />
           ))}
@@ -915,22 +973,22 @@ export default function App() {
         {/* Mobile Bottom Navigation */}
         {isMobile && (
           <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "white", borderTop: "1px solid #eee", display: "flex", justifyContent: "space-around", padding: "8px 0 12px", zIndex: 100 }}>
-            <button onClick={() => { setCurrentPage("home"); setShowCart(false) }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", cursor: "pointer", color: "#999" }}>
-              <span style={{ fontSize: "22px" }}>🏠</span>
-              <span style={{ fontSize: "9px" }}>Nyumbani</span>
+            <button onClick={() => { setCurrentPage("home"); setShowCart(false) }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", background: "transparent", border: "none", cursor: "pointer", color: "#999", padding: "8px 10px", borderRadius: "16px" }}>
+              <span style={{ fontSize: "24px", width: "42px", height: "42px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "14px", background: "#f5f5f5" }}><SketchHomeIcon size={20} /></span>
+              <span style={{ fontSize: "10px", fontWeight: "600" }}>Nyumbani</span>
             </button>
-            <button onClick={() => { setCurrentPage("shops"); setShopSearchQuery("") }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", cursor: "pointer", color: "#999" }}>
-              <span style={{ fontSize: "22px" }}>🏪</span>
-              <span style={{ fontSize: "9px" }}>Machimbo</span>
+            <button onClick={() => { setCurrentPage("shops"); setShopSearchQuery("") }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", background: "transparent", border: "none", cursor: "pointer", color: "#999", padding: "8px 10px", borderRadius: "16px" }}>
+              <span style={{ fontSize: "24px", width: "42px", height: "42px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "14px", background: "#f5f5f5" }}><SketchShopIcon size={20} /></span>
+              <span style={{ fontSize: "10px", fontWeight: "600" }}>Machimbo</span>
             </button>
-            <button onClick={() => { setCurrentPage("agizaChina"); setAgizaChinaSearchQuery("") }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", cursor: "pointer", color: "#ff6b00" }}>
-              <span style={{ fontSize: "22px" }}>🇨🇳</span>
-              <span style={{ fontSize: "9px", fontWeight: "bold" }}>China</span>
+            <button onClick={() => { setCurrentPage("agizaChina"); setAgizaChinaSearchQuery("") }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", background: "transparent", border: "none", cursor: "pointer", color: "#ff6b00", padding: "8px 10px", borderRadius: "16px" }}>
+              <span style={{ fontSize: "24px", width: "42px", height: "42px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "14px", background: "#fff2e6" }}>🇨🇳</span>
+              <span style={{ fontSize: "10px", fontWeight: "700" }}>China</span>
             </button>
-            <button onClick={() => setShowCart(true)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", cursor: "pointer", position: "relative", color: "#999" }}>
-              <span style={{ fontSize: "22px" }}>🛒</span>
-              <span style={{ fontSize: "9px" }}>Kikapu</span>
-              {getTotalItems() > 0 && <span style={{ position: "absolute", top: "-4px", right: "2px", background: "#ef4444", color: "white", fontSize: "8px", borderRadius: "50%", width: "14px", height: "14px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
+            <button onClick={() => setShowCart(true)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", background: "transparent", border: "none", cursor: "pointer", position: "relative", color: "#999", padding: "8px 10px", borderRadius: "16px" }}>
+              <span style={{ fontSize: "24px", width: "42px", height: "42px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "14px", background: "#f5f5f5" }}>🛒</span>
+              <span style={{ fontSize: "10px", fontWeight: "600" }}>Kikapu</span>
+              {getTotalItems() > 0 && <span style={{ position: "absolute", top: "4px", right: "14px", background: "#ef4444", color: "white", fontSize: "8px", borderRadius: "50%", width: "16px", height: "16px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
             </button>
           </div>
         )}
@@ -951,15 +1009,10 @@ export default function App() {
                 <div style={{ fontSize: "10px", color: "#999" }}>chimbo la machimbo</div>
               </div>
               <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
-                <button onClick={() => { setCurrentPage("home"); setShowCart(false) }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>🏠 Nyumbani</button>
+                <button onClick={() => { setCurrentPage("home"); setShowCart(false) }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", color: "#000" }}>🏠 Nyumbani</button>
                 <button onClick={() => { setCurrentPage("shops"); setShopSearchQuery("") }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontWeight: "bold", color: "#ff6b00" }}>🏪 Machimbo</button>
-                <button onClick={() => { setCurrentPage("agizaChina"); setAgizaChinaSearchQuery("") }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>🇨🇳 Agiza China</button>
-                <div onClick={() => setShowCart(true)} style={{ position: "relative", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
-                  <span>🛒</span>
-                  {getTotalItems() > 0 && <span style={{ position: "absolute", top: "-8px", right: "-12px", background: "#ff6b00", color: "white", fontSize: "10px", borderRadius: "50%", width: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
-                  <span style={{ fontSize: "14px" }}>Kikapu</span>
-                </div>
-                <button onClick={() => setCurrentPage("account")} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+                <button onClick={() => { setCurrentPage("agizaChina"); setAgizaChinaSearchQuery("") }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", color: "#000" }}>🇨🇳 Agiza China</button>
+                <button onClick={() => setCurrentPage("account")} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", color: "#000" }}>
                   👤 {user ? user.name?.split(" ")[0] : "Akaunti"}
                 </button>
               </div>
@@ -979,10 +1032,6 @@ export default function App() {
                 <input type="text" placeholder="🔍 Tafuta machimbo..." value={shopSearchQuery} onChange={e => setShopSearchQuery(e.target.value)} style={{ width: "100%", padding: "6px 12px", border: "2px solid #ff6b00", borderRadius: "25px", fontSize: "11px" }} />
               </div>
               <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                <div onClick={() => setShowCart(true)} style={{ position: "relative", cursor: "pointer" }}>
-                  <span>🛒</span>
-                  {getTotalItems() > 0 && <span style={{ position: "absolute", top: "-6px", right: "-10px", background: "#ff6b00", color: "white", fontSize: "8px", borderRadius: "50%", width: "14px", height: "14px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
-                </div>
                 <button onClick={() => setCurrentPage("account")} style={{ background: "none", border: "none", cursor: "pointer" }}>
                   👤
                 </button>
@@ -992,7 +1041,7 @@ export default function App() {
         )}
 
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" }}>
-          <h1 style={{ fontSize: "28px", textAlign: "center", marginBottom: "20px" }}>🏪 Machimbo Tanzania</h1>
+          <h1 style={{ fontSize: "28px", textAlign: "center", marginBottom: "20px", color: "#000" }}>🏪 Machimbo Tanzania</h1>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: "20px" }}>
             {filteredShops.map(shop => (
               <ShopCard key={shop.id} shop={shop} onClick={() => handleViewShop(shop)} />
@@ -1010,22 +1059,22 @@ export default function App() {
         {/* Mobile Bottom Navigation */}
         {isMobile && (
           <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "white", borderTop: "1px solid #eee", display: "flex", justifyContent: "space-around", padding: "8px 0 12px", zIndex: 100 }}>
-            <button onClick={() => { setCurrentPage("home"); setShowCart(false) }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", cursor: "pointer", color: "#999" }}>
-              <span style={{ fontSize: "22px" }}>🏠</span>
-              <span style={{ fontSize: "9px" }}>Nyumbani</span>
+            <button onClick={() => { setCurrentPage("home"); setShowCart(false) }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", background: "transparent", border: "none", cursor: "pointer", color: "#999", padding: "8px 10px", borderRadius: "16px" }}>
+              <span style={{ fontSize: "24px", width: "42px", height: "42px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "14px", background: "#f5f5f5" }}>🏠</span>
+              <span style={{ fontSize: "10px", fontWeight: "600" }}>Nyumbani</span>
             </button>
-            <button onClick={() => { setCurrentPage("shops"); setShopSearchQuery("") }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", cursor: "pointer", color: "#ff6b00" }}>
-              <span style={{ fontSize: "22px" }}>🏪</span>
-              <span style={{ fontSize: "9px", fontWeight: "bold" }}>Machimbo</span>
+            <button onClick={() => { setCurrentPage("shops"); setShopSearchQuery("") }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", background: "transparent", border: "none", cursor: "pointer", color: "#ff6b00", padding: "8px 10px", borderRadius: "16px" }}>
+              <span style={{ fontSize: "24px", width: "42px", height: "42px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "14px", background: "#fff2e6" }}>🏪</span>
+              <span style={{ fontSize: "10px", fontWeight: "700" }}>Machimbo</span>
             </button>
-            <button onClick={() => { setCurrentPage("agizaChina"); setAgizaChinaSearchQuery("") }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", cursor: "pointer", color: "#999" }}>
-              <span style={{ fontSize: "22px" }}>🇨🇳</span>
-              <span style={{ fontSize: "9px" }}>China</span>
+            <button onClick={() => { setCurrentPage("agizaChina"); setAgizaChinaSearchQuery("") }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", background: "transparent", border: "none", cursor: "pointer", color: "#999", padding: "8px 10px", borderRadius: "16px" }}>
+              <span style={{ fontSize: "24px", width: "42px", height: "42px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "14px", background: "#f5f5f5" }}>🇨🇳</span>
+              <span style={{ fontSize: "10px", fontWeight: "600" }}>China</span>
             </button>
-            <button onClick={() => setShowCart(true)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", cursor: "pointer", position: "relative", color: "#999" }}>
-              <span style={{ fontSize: "22px" }}>🛒</span>
-              <span style={{ fontSize: "9px" }}>Kikapu</span>
-              {getTotalItems() > 0 && <span style={{ position: "absolute", top: "-4px", right: "2px", background: "#ef4444", color: "white", fontSize: "8px", borderRadius: "50%", width: "14px", height: "14px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
+            <button onClick={() => setShowCart(true)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", background: "transparent", border: "none", cursor: "pointer", position: "relative", color: "#999", padding: "8px 10px", borderRadius: "16px" }}>
+              <span style={{ fontSize: "24px", width: "42px", height: "42px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "14px", background: "#f5f5f5" }}>🛒</span>
+              <span style={{ fontSize: "10px", fontWeight: "600" }}>Kikapu</span>
+              {getTotalItems() > 0 && <span style={{ position: "absolute", top: "4px", right: "14px", background: "#ef4444", color: "white", fontSize: "8px", borderRadius: "50%", width: "16px", height: "16px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
             </button>
           </div>
         )}
@@ -1054,14 +1103,9 @@ export default function App() {
             </div>
             <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
               <button onClick={() => { setCurrentPage("home"); setShowCart(false) }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontWeight: "bold", color: "#ff6b00" }}>🏠 Nyumbani</button>
-              <button onClick={() => { setCurrentPage("shops"); setShopSearchQuery("") }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>🏪 Machimbo</button>
-              <button onClick={() => { setCurrentPage("agizaChina"); setAgizaChinaSearchQuery("") }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>🇨🇳 Agiza China</button>
-              <div onClick={() => setShowCart(true)} style={{ position: "relative", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
-                <span>🛒</span>
-                {getTotalItems() > 0 && <span style={{ position: "absolute", top: "-8px", right: "-12px", background: "#ff6b00", color: "white", fontSize: "10px", borderRadius: "50%", width: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
-                <span style={{ fontSize: "14px" }}>Kikapu</span>
-              </div>
-              <button onClick={() => setCurrentPage("account")} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+              <button onClick={() => { setCurrentPage("shops"); setShopSearchQuery("") }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", color: "#000" }}>🏪 Machimbo</button>
+              <button onClick={() => { setCurrentPage("agizaChina"); setAgizaChinaSearchQuery("") }} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", color: "#000" }}>🇨🇳 Agiza China</button>
+              <button onClick={() => setCurrentPage("account")} style={{ background: "none", border: "none", fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", color: "#000" }}>
                 👤 {user ? user.name?.split(" ")[0] : "Akaunti"}
               </button>
             </div>
@@ -1081,10 +1125,6 @@ export default function App() {
               <input type="text" placeholder="🔍 Tafuta..." value={productSearchQuery} onChange={e => setProductSearchQuery(e.target.value)} style={{ width: "100%", padding: "6px 12px", border: "2px solid #ff6b00", borderRadius: "25px", fontSize: "11px" }} />
             </div>
             <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-              <div onClick={() => setShowCart(true)} style={{ position: "relative", cursor: "pointer" }}>
-                <span className={cartBounce ? "cart-bounce" : ""}>🛒</span>
-                {getTotalItems() > 0 && <span style={{ position: "absolute", top: "-6px", right: "-10px", background: "#ff6b00", color: "white", fontSize: "8px", borderRadius: "50%", width: "14px", height: "14px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
-              </div>
               <button onClick={() => setCurrentPage("account")} style={{ background: "none", border: "none", cursor: "pointer" }}>
                 👤
               </button>
@@ -1166,22 +1206,22 @@ export default function App() {
       {/* Mobile Bottom Navigation */}
       {isMobile && (
         <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, background: "white", borderTop: "1px solid #eee", display: "flex", justifyContent: "space-around", padding: "8px 0 12px", zIndex: 100, boxShadow: "0 -2px 10px rgba(0,0,0,0.05)" }}>
-          <button onClick={() => { setCurrentPage("home"); setShowCart(false) }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", cursor: "pointer", color: currentPage === "home" ? "#ff6b00" : "#999" }}>
-            <span style={{ fontSize: "22px" }}>🏠</span>
-            <span style={{ fontSize: "9px", fontWeight: currentPage === "home" ? "bold" : "normal" }}>Nyumbani</span>
+          <button onClick={() => { setCurrentPage("home"); setShowCart(false) }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", background: "transparent", border: "none", cursor: "pointer", color: currentPage === "home" ? "#ff6b00" : "#999", padding: "8px 10px", borderRadius: "16px" }}>
+            <span style={{ fontSize: "24px", width: "42px", height: "42px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "14px", background: currentPage === "home" ? "#fff2e6" : "#f5f5f5" }}><SketchHomeIcon size={20} /></span>
+            <span style={{ fontSize: "10px", fontWeight: currentPage === "home" ? "700" : "600" }}>Nyumbani</span>
           </button>
-          <button onClick={() => { setCurrentPage("shops"); setShopSearchQuery("") }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", cursor: "pointer", color: currentPage === "shops" ? "#ff6b00" : "#999" }}>
-            <span style={{ fontSize: "22px" }}>🏪</span>
-            <span style={{ fontSize: "9px", fontWeight: currentPage === "shops" ? "bold" : "normal" }}>Machimbo</span>
+          <button onClick={() => { setCurrentPage("shops"); setShopSearchQuery("") }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", background: "transparent", border: "none", cursor: "pointer", color: currentPage === "shops" ? "#ff6b00" : "#999", padding: "8px 10px", borderRadius: "16px" }}>
+            <span style={{ fontSize: "24px", width: "42px", height: "42px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "14px", background: currentPage === "shops" ? "#fff2e6" : "#f5f5f5" }}><SketchShopIcon size={20} /></span>
+            <span style={{ fontSize: "10px", fontWeight: currentPage === "shops" ? "700" : "600" }}>Machimbo</span>
           </button>
-          <button onClick={() => { setCurrentPage("agizaChina"); setAgizaChinaSearchQuery("") }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", cursor: "pointer", color: currentPage === "agizaChina" ? "#ff6b00" : "#999" }}>
-            <span style={{ fontSize: "22px" }}>🇨🇳</span>
-            <span style={{ fontSize: "9px", fontWeight: currentPage === "agizaChina" ? "bold" : "normal" }}>China</span>
+          <button onClick={() => { setCurrentPage("agizaChina"); setAgizaChinaSearchQuery("") }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", background: "transparent", border: "none", cursor: "pointer", color: currentPage === "agizaChina" ? "#ff6b00" : "#999", padding: "8px 10px", borderRadius: "16px" }}>
+            <span style={{ fontSize: "24px", width: "42px", height: "42px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "14px", background: currentPage === "agizaChina" ? "#fff2e6" : "#f5f5f5" }}>🇨🇳</span>
+            <span style={{ fontSize: "10px", fontWeight: currentPage === "agizaChina" ? "700" : "600" }}>China</span>
           </button>
-          <button onClick={() => setShowCart(true)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", background: "none", border: "none", cursor: "pointer", position: "relative", color: showCart ? "#ff6b00" : "#999" }}>
-            <span style={{ fontSize: "22px" }}>🛒</span>
-            <span style={{ fontSize: "9px" }}>Kikapu</span>
-            {getTotalItems() > 0 && <span style={{ position: "absolute", top: "-4px", right: "2px", background: "#ef4444", color: "white", fontSize: "8px", fontWeight: "bold", borderRadius: "50%", width: "14px", height: "14px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
+          <button onClick={() => setShowCart(true)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", background: "transparent", border: "none", cursor: "pointer", position: "relative", color: showCart ? "#ff6b00" : "#999", padding: "8px 10px", borderRadius: "16px" }}>
+            <span style={{ fontSize: "24px", width: "42px", height: "42px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "14px", background: "#f5f5f5" }}>🛒</span>
+            <span style={{ fontSize: "10px", fontWeight: "600" }}>Kikapu</span>
+            {getTotalItems() > 0 && <span style={{ position: "absolute", top: "4px", right: "14px", background: "#ef4444", color: "white", fontSize: "8px", borderRadius: "50%", width: "16px", height: "16px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
           </button>
         </div>
       )}
