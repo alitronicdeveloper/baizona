@@ -42,14 +42,15 @@ export const useCartStore = create(
       getGroupedBySeller: () => {
         const grouped = {}
         get().items.forEach(item => {
-          if (!grouped[item.sellerId]) {
-            grouped[item.sellerId] = {
+          const sellerKey = item.sellerId || item.sellerName || "unknown"
+          if (!grouped[sellerKey]) {
+            grouped[sellerKey] = {
               sellerName: item.sellerName,
               sellerPhone: item.sellerPhone,
               items: []
             }
           }
-          grouped[item.sellerId].items.push(item)
+          grouped[sellerKey].items.push(item)
         })
         return grouped
       }

@@ -1,4 +1,4 @@
-// src/App.jsx - BAIZONA MACHIMBO COMPLETE (3 Columns on Mobile)
+// src/App.jsx - BAIZONA (FIXED - No Duplicate Declarations)
 import { useState, useEffect } from "react"
 import { createClient } from '@supabase/supabase-js'
 import { useCartStore } from './stores/cartStore'
@@ -7,202 +7,476 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || ""
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ""
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-const categories = [
-  "Machimbo Yote",
-  "Machimbo ya Viatu",
-  "Machimbo ya Nguo",
-  "Machimbo ya Stationary",
-  "Machimbo ya Vyakula",
-  "Machimbo ya Vitu vya Dukani",
-  "Machimbo ya Vyombo",
-  "Machimbo ya Accessories"
+// ============================================
+// SAMPLE PRODUCTS DATA
+// ============================================
+const SAMPLE_PRODUCTS = [
+  { id: 1, name: "Viatu vya Sneakers za Kiume", price: 25000, shop: "Alicom Express", category: "viatu", min_order_quantity: 50, bulk_unit: "pair", image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400", description: "Sneakers za kiume ubora wa juu.", stock: 5000, sold: 2340, sellerPhone: "255712345678" },
+  { id: 2, name: "Viatu vya Wanawake (Heels)", price: 35000, shop: "Viatu Bora", category: "viatu", min_order_quantity: 30, bulk_unit: "pair", image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400", description: "Viatu vya kisasa vya wanawake.", stock: 3000, sold: 1800, sellerPhone: "255712345679" },
+  { id: 3, name: "Vitenge vya Kiafrika (Kilio 6)", price: 45000, shop: "Vitenge House", category: "nguo", min_order_quantity: 20, bulk_unit: "kitambaa", image: "https://images.unsplash.com/photo-1565688534246-05d6f5e184e3?w=400", description: "Vitenge vya ubora wa juu.", stock: 8000, sold: 5600, sellerPhone: "255712345680" },
+  { id: 4, name: "Jeans za Kiume (PCS 50)", price: 18000, shop: "Jeans Tanzania", category: "nguo", min_order_quantity: 50, bulk_unit: "pcs", image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400", description: "Jeans za kiume sizes 28-42.", stock: 15000, sold: 8900, sellerPhone: "255712345681" },
+  { id: 5, name: "Mchele wa Tanzania (Supremo)", price: 2500, shop: "Mchele Bora", category: "vyakula", min_order_quantity: 500, bulk_unit: "kg", image: "https://images.unsplash.com/photo-1586201375761-83865001e8ac?w=400", description: "Mchele wa Tanzania ubora wa juu.", stock: 50000, sold: 35000, sellerPhone: "255712345682" },
+  { id: 6, name: "Power Bank 20000mAh", price: 35000, shop: "Tech Tanzania", category: "electronics", min_order_quantity: 20, bulk_unit: "pcs", image: "https://images.unsplash.com/photo-1609592424901-8f6ae6b4f0d4?w=400", description: "Power bank ya 20000mAh.", stock: 2000, sold: 1560, sellerPhone: "255712345683" },
+  { id: 7, name: "Sabuni za Kioo (Pcs 100)", price: 45000, shop: "Vipodozi Bora", category: "vipodozi", min_order_quantity: 20, bulk_unit: "carton", image: "https://images.unsplash.com/photo-1600857062241-98e5dba7f214?w=400", description: "Sabuni za kioo za kunawiri ngozi.", stock: 8000, sold: 5600, sellerPhone: "255712345684" },
+  { id: 8, name: "Sufuria za Alumini (Set 5)", price: 65000, shop: "Vyombo Bora", category: "vifaa_vya_nyumbani", min_order_quantity: 20, bulk_unit: "set", image: "https://images.unsplash.com/photo-1584990347449-b85f6ce4e9e3?w=400", description: "Sufuria za alumini set 5.", stock: 2000, sold: 1450, sellerPhone: "255712345685" },
+  { id: 9, name: "Simu za Kusini (Samsung)", price: 250000, shop: "Tech Tanzania", category: "electronics", min_order_quantity: 10, bulk_unit: "pcs", image: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=400", description: "Simu za kisasa za Samsung.", stock: 500, sold: 200, sellerPhone: "255712345683" },
+  { id: 10, name: "Laptop Dell (Wholesale)", price: 850000, shop: "Tech Tanzania", category: "electronics", min_order_quantity: 5, bulk_unit: "pcs", image: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=400", description: "Laptop Dell za ofisi.", stock: 300, sold: 120, sellerPhone: "255712345683" },
 ]
 
-const colorMap = {
-  'Nyeusi': '#1e293b', 'Nyekundu': '#ef4444', 'Nyeupe': '#f8fafc',
-  'Bluu': '#3b82f6', 'Kijani': '#10b981', 'Manjano': '#f59e0b',
-  'Zambarau': '#8b5cf6', 'Pink': '#ec4899', 'Kahawia': '#78350f'
+const SAMPLE_SHOPS = [
+  { id: 1, name: "Alicom Express", owner: "Ali Mwinyi", location: "Kariakoo, Dar es Salaam", category: "Viatu", phone: "255712345678", email: "alicomexpress@baizona.com", since: "2020", rating: 4.8, products: 45, image: "https://images.unsplash.com/photo-1567446537708-ac4aa75c9c28?w=200", description: "Muuzaji mkubwa wa viatu vya jumla Tanzania." },
+  { id: 2, name: "Vitenge House", owner: "Fatma Hassan", location: "Kariakoo, Dar es Salaam", category: "Nguo", phone: "255712345680", email: "vitengehouse@baizona.com", since: "2018", rating: 4.9, products: 120, image: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=200", description: "Vitenge vya kisasa na vya kitamaduni." },
+  { id: 3, name: "Tech Tanzania", owner: "John Mbowe", location: "Kariakoo, Dar es Salaam", category: "Electronics", phone: "255712345683", email: "techtz@baizona.com", since: "2021", rating: 4.7, products: 60, image: "https://images.unsplash.com/photo-1556741533-6e6a3bd8b341?w=200", description: "Electronics na gadgets za kisasa." },
+  { id: 4, name: "Mchele Bora", owner: "Hamisi Juma", location: "Buguruni, Dar es Salaam", category: "Vyakula", phone: "255712345682", email: "mchelebora@baizona.com", since: "2019", rating: 4.9, products: 25, image: "https://images.unsplash.com/photo-1586201375761-83865001e8ac?w=200", description: "Mchele na vyakula vingine vya jumla." },
+  { id: 5, name: "Vipodozi Bora", owner: "Zainabu Rashid", location: "Kariakoo, Dar es Salaam", category: "Vipodozi", phone: "255712345684", email: "vipodozibora@baizona.com", since: "2020", rating: 4.6, products: 80, image: "https://images.unsplash.com/photo-1596462502278-27bfdc7c5e58?w=200", description: "Sabuni, mafuta na vipodozi vingine." },
+  { id: 6, name: "Stationary Plus", owner: "Peter John", location: "Posta, Dar es Salaam", category: "Stationary", phone: "255712345687", email: "stationaryplus@baizona.com", since: "2017", rating: 4.8, products: 150, image: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=200", description: "Vifaa vyote vya shule na ofisi." },
+  { id: 7, name: "Vyombo Bora", owner: "Salma Abdallah", location: "Kariakoo, Dar es Salaam", category: "Vifaa vya Nyumbani", phone: "255712345685", email: "vyombobora@baizona.com", since: "2016", rating: 4.7, products: 95, image: "https://images.unsplash.com/photo-1556911220-bda9f7f7597e?w=200", description: "Vyombo vya jikoni na vifaa vya nyumbani." },
+  { id: 8, name: "Jeans Tanzania", owner: "Richard Mboya", location: "Kariakoo, Dar es Salaam", category: "Nguo", phone: "255712345681", email: "jeanstz@baizona.com", since: "2019", rating: 4.5, products: 55, image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=200", description: "Jeans za kiume na wanawake." },
+]
+
+const SAMPLE_AGIZA_CHINA_COMPANIES = [
+  { 
+    id: 1, 
+    name: "Speed Cargo Tanzania", 
+    logo: "https://images.unsplash.com/photo-1567446537708-ac4aa75c9c28?w=200",
+    location: "Kariakoo, Dar es Salaam",
+    since: "2010",
+    rating: 4.9,
+    phone: "255712345678",
+    email: "info@speedcargo.co.tz",
+    description: "Wataalamu wa usafirishaji wa bidhaa kutoka China kwenda Tanzania.",
+    services: ["Sourcing", "Shipping", "Customs clearance", "Door-to-door delivery"],
+    howItWorks: [
+      { step: 1, title: "Wasiliana nasi", desc: "Tupe orodha ya bidhaa" },
+      { step: 2, title: "Tunakusaidia kununua", desc: "Tunakutafutia bei bora" },
+      { step: 3, title: "Tunasafirisha", desc: "Tunaweka mzigo kwenye kontena" },
+      { step: 4, title: "Unapokea", desc: "Mzigo unakufikia" }
+    ],
+    products: [
+      { id: 101, name: "Simu za Huawei", price: 180000, image: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=200", bulk_unit: "pcs", min_order: 10 },
+      { id: 102, name: "Laptop Lenovo", price: 550000, image: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=200", bulk_unit: "pcs", min_order: 5 },
+      { id: 103, name: "Smart Watch", price: 65000, image: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=200", bulk_unit: "pcs", min_order: 20 },
+    ]
+  },
+  { 
+    id: 2, 
+    name: "China Link Logistics", 
+    logo: "https://images.unsplash.com/photo-1556741533-6e6a3bd8b341?w=200",
+    location: "Kariakoo, Dar es Salaam",
+    since: "2015",
+    rating: 4.8,
+    phone: "255712345679",
+    email: "info@chinalink.co.tz",
+    description: "Wakala wa usafirishaji wa mizigo kutoka China.",
+    services: ["Bidhaa sourcing", "Consolidation", "Shipping", "Customs clearance"],
+    howItWorks: [
+      { step: 1, title: "Chagua Bidhaa", desc: "Tupe link za bidhaa" },
+      { step: 2, title: "Tunakupa bei", desc: "Tunakupatia quotation" },
+      { step: 3, title: "Tunaagiza", desc: "Tunakulipa na kuagiza" },
+      { step: 4, title: "Bidhaa zinafika", desc: "Unapokea bidhaa" }
+    ],
+    products: [
+      { id: 201, name: "Phone Cases (100pcs)", price: 25000, image: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=200", bulk_unit: "box", min_order: 50 },
+      { id: 202, name: "USB Cables (50pcs)", price: 15000, image: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=200", bulk_unit: "box", min_order: 30 },
+    ]
+  },
+  { 
+    id: 3, 
+    name: "Global Procurement Tanzania", 
+    logo: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=200",
+    location: "Posta, Dar es Salaam",
+    since: "2018",
+    rating: 4.7,
+    phone: "255712345680",
+    email: "info@globalprocurement.co.tz",
+    description: "Mtaalamu wa utafutaji na usafirishaji wa bidhaa kutoka China.",
+    services: ["Utafutaji wa bidhaa", "Quality control", "Shipping", "Customs clearance"],
+    howItWorks: [
+      { step: 1, title: "Wasiliana", desc: "Tupe orodha yako" },
+      { step: 2, title: "Tunachanganua", desc: "Tunakupatia bei bora" },
+      { step: 3, title: "Tunaagiza", desc: "Tunakusaidia kuagiza" },
+      { step: 4, title: "Unapokea", desc: "Mzigo unawasili" }
+    ],
+    products: [
+      { id: 301, name: "LED Lights (50pcs)", price: 35000, image: "https://images.unsplash.com/photo-1563089145-599997674d42?w=200", bulk_unit: "box", min_order: 20 },
+      { id: 302, name: "Solar Panels", price: 120000, image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=200", bulk_unit: "pcs", min_order: 10 },
+    ]
+  },
+  { 
+    id: 4, 
+    name: "Tanzania China Freight", 
+    logo: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=200",
+    location: "Kigogo, Dar es Salaam",
+    since: "2012",
+    rating: 4.9,
+    phone: "255712345681",
+    email: "info@tzchinafreight.co.tz",
+    description: "Usafirishaji wa mizigo kutoka China kwenda Tanzania kwa bei nafuu.",
+    services: ["FCL/LCL shipping", "Air freight", "Warehousing", "Door-to-door delivery"],
+    howItWorks: [
+      { step: 1, title: "Contact us", desc: "Tueleze bidhaa" },
+      { step: 2, title: "Get quote", desc: "Tunakupatia quotation" },
+      { step: 3, title: "Shipping", desc: "Tunasafirisha mzigo" },
+      { step: 4, title: "Receive", desc: "Unapokea bidhaa" }
+    ],
+    products: [
+      { id: 401, name: "Clothes (Bulk)", price: 150000, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200", bulk_unit: "bale", min_order: 10 },
+      { id: 402, name: "Shoes (Wholesale)", price: 250000, image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=200", bulk_unit: "bale", min_order: 5 },
+    ]
+  },
+]
+
+const PRODUCT_CATEGORIES = [
+  { id: "all", name: "Bidhaa Zote", icon: "🏭", color: "#ff6b00", description: "Bidhaa zote za jumla" },
+  { id: "viatu", name: "Viatu", icon: "👟", color: "#667eea", description: "Viatu vya wanawake, wanaume na watoto" },
+  { id: "nguo", name: "Nguo", icon: "👗", color: "#f093fb", description: "Vitenge, Jeans, T-shirts, Kanga" },
+  { id: "vyakula", name: "Vyakula", icon: "🍎", color: "#43e97b", description: "Mchele, Maharage, Unga, Mafuta" },
+  { id: "stationary", name: "Stationary", icon: "✏️", color: "#a18cd1", description: "Madaftari, Kalamu, Rula" },
+  { id: "vifaa_vya_nyumbani", name: "Vifaa vya Nyumbani", icon: "🏠", color: "#fa709a", description: "Sufuria, Vikombe, Taulo" },
+  { id: "electronics", name: "Electronics", icon: "📱", color: "#4facfe", description: "Power bank, Speaker, Gadgets" },
+  { id: "vipodozi", name: "Vipodozi", icon: "💄", color: "#ff9a9e", description: "Sabuni, Mafuta ya Nazi, Cream" },
+]
+
+const fmt = (n) => Number(n || 0).toLocaleString()
+
+const vibrate = () => { if (window.navigator?.vibrate) window.navigator.vibrate(50) }
+
+const showToast = (msg, type = "success") => {
+  const toast = document.createElement("div")
+  toast.textContent = msg
+  Object.assign(toast.style, {
+    position: "fixed", bottom: "20px", left: "50%", transform: "translateX(-50%)",
+    background: type === "success" ? "#10b981" : "#ef4444", color: "white",
+    padding: "12px 24px", borderRadius: "50px", zIndex: 10000,
+    fontSize: "14px", fontWeight: "bold", whiteSpace: "nowrap"
+  })
+  document.body.appendChild(toast)
+  setTimeout(() => toast.remove(), 2500)
 }
 
-// ============ SELLER DASHBOARD ============
-const SellerDashboard = ({ seller, onLogout, onBackToHome }) => {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('products')
-  const [newProduct, setNewProduct] = useState({
-    name: '', price: '', description: '', min_order_quantity: 50, bulk_unit: 'pcs',
-    wholesale_category: 'Machimbo ya Viatu'
-  })
-  const [productImages, setProductImages] = useState([])
-  const [productImagesPreview, setProductImagesPreview] = useState([])
-  const [variants, setVariants] = useState([])
-  const [newVariant, setNewVariant] = useState({ type: 'color', name: 'Rangi', options: '' })
+// Star Rating Component
+const StarRating = ({ rating = 4.5, reviewCount = 128 }) => (
+  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+    <div style={{ display: "flex", gap: "2px" }}>
+      {[...Array(5)].map((_, i) => (
+        <span key={i} style={{ color: i < Math.floor(rating) ? "#ffc107" : "#ddd", fontSize: "12px" }}>{i < Math.floor(rating) ? "★" : "☆"}</span>
+      ))}
+    </div>
+    <span style={{ fontSize: "10px", color: "#888" }}>({reviewCount})</span>
+  </div>
+)
 
-  useEffect(() => { fetchProducts() }, [])
+// SMALL PRODUCT CARD
+const SmallProductCard = ({ product, onClick }) => (
+  <div onClick={onClick} style={{
+    background: "white", borderRadius: "10px", overflow: "hidden", border: "1px solid #eee",
+    cursor: "pointer", transition: "all 0.3s", minWidth: "160px"
+  }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 5px 15px rgba(0,0,0,0.1)" }}
+     onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none" }}>
+    <div style={{ height: "100px", background: "#fafafa", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <img src={product.image} alt={product.name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+    </div>
+    <div style={{ padding: "8px" }}>
+      <h4 style={{ fontSize: "11px", fontWeight: "600", color: "#333", margin: "0 0 4px" }}>{product.name.substring(0, 30)}...</h4>
+      <div style={{ fontSize: "12px", fontWeight: "bold", color: "#ff6b00" }}>Tsh {fmt(product.price)}</div>
+      <div style={{ fontSize: "9px", color: "#888" }}>MOQ: {product.min_order}</div>
+    </div>
+  </div>
+)
 
-  const fetchProducts = async () => {
-    const { data } = await supabase.from('products').select('*').eq('seller_id', seller.id).order('created_at', { ascending: false })
-    if (data) setProducts(data)
-    setLoading(false)
-  }
+// PRODUCT CARD (Large)
+const ProductCard = ({ product, onClick, index }) => (
+  <div onClick={onClick} style={{
+    background: "white", borderRadius: "12px", overflow: "hidden", border: "1px solid #eee",
+    cursor: "pointer", transition: "all 0.3s", animation: `fadeInUp 0.4s ease ${index * 0.03}s both`,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+  }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.1)"; e.currentTarget.style.borderColor = "#ff6b00" }}
+     onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)"; e.currentTarget.style.borderColor = "#eee" }}>
+    <div style={{ position: "relative", height: "200px", background: "#fafafa", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <img src={product.image} alt={product.name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+      <span style={{ position: "absolute", top: "10px", left: "10px", background: "#ff6b00", color: "white", fontSize: "9px", fontWeight: "bold", padding: "3px 8px", borderRadius: "20px" }}>MOQ {product.min_order_quantity}</span>
+    </div>
+    <div style={{ padding: "12px" }}>
+      <div style={{ fontSize: "11px", color: "#ff6b00", marginBottom: "4px" }}>🏪 {product.shop}</div>
+      <h3 style={{ fontSize: "13px", fontWeight: "600", color: "#333", margin: "0 0 4px", lineHeight: "1.4", height: "36px", overflow: "hidden" }}>{product.name}</h3>
+      <StarRating rating={4.5} reviewCount={Math.floor(product.sold / 10)} />
+      <div style={{ marginTop: "8px" }}>
+        <span style={{ fontSize: "18px", fontWeight: "700", color: "#ff6b00" }}>Tsh {fmt(product.price)}</span>
+        <span style={{ fontSize: "10px", color: "#999", marginLeft: "4px" }}>/{product.bulk_unit}</span>
+      </div>
+    </div>
+  </div>
+)
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files)
-    setProductImages(files)
-    setProductImagesPreview(files.map(f => URL.createObjectURL(f)))
-  }
-
-  const addVariant = () => {
-    if (newVariant.options.trim()) {
-      setVariants([...variants, { type: newVariant.type, name: newVariant.name, options: newVariant.options.split(',').map(o => o.trim()) }])
-      setNewVariant({ type: 'color', name: 'Rangi', options: '' })
-    }
-  }
-
-  const removeVariant = (index) => setVariants(variants.filter((_, i) => i !== index))
-
-  const uploadImages = async () => {
-    const uploaded = []
-    for (const file of productImages) {
-      const fileName = `${Date.now()}-${file.name}`
-      const { error } = await supabase.storage.from('products-images').upload(fileName, file)
-      if (!error) {
-        const { data: u } = supabase.storage.from('products-images').getPublicUrl(fileName)
-        uploaded.push(u.publicUrl)
-      }
-    }
-    return uploaded
-  }
-
-  const handleAddProduct = async (e) => {
-    e.preventDefault()
-    if (!newProduct.name || !newProduct.price) { alert("Jaza jina na bei!"); return }
-    
-    const uploadedImages = productImages.length > 0 ? await uploadImages() : ['https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500']
-    
-    const { error } = await supabase.from('products').insert([{
-      ...newProduct,
-      price: parseFloat(newProduct.price),
-      seller_id: seller.id,
-      shop: seller.shop_name,
-      images: uploadedImages,
-      variants: variants,
-      status: 'active'
-    }])
-    
-    if (error) alert('Error: ' + error.message)
-    else {
-      alert('✅ Bidhaa imeongezwa!')
-      setNewProduct({ name: '', price: '', description: '', min_order_quantity: 50, bulk_unit: 'pcs', wholesale_category: 'Machimbo ya Viatu' })
-      setProductImages([]); setProductImagesPreview([]); setVariants([])
-      fetchProducts(); setActiveTab('products')
-    }
-  }
-
-  const handleDeleteProduct = async (productId) => {
-    if (confirm('Futa bidhaa hii?')) {
-      await supabase.from('products').delete().eq('id', productId)
-      fetchProducts()
-    }
-  }
-
-  const bulkUnits = ['pcs', 'dozen', 'kg', 'pair', 'meter']
-  const wholesaleCategories = ['Machimbo ya Viatu', 'Machimbo ya Nguo', 'Machimbo ya Stationary', 'Machimbo ya Vyakula', 'Machimbo ya Vitu vya Dukani', 'Machimbo ya Vyombo', 'Machimbo ya Accessories']
-
+// SHOP CARD (Machimbo - No Buttons)
+const ShopCard = ({ shop, onClick }) => {
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: '80px' }}>
-      <div style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', padding: '16px 20px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button onClick={onBackToHome} style={{ background: 'white', color: '#f59e0b', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>← Rudi</button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '40px', height: '40px', background: 'white', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold', color: '#f59e0b' }}>B</div>
-              <div><div style={{ fontSize: '18px', fontWeight: 'bold', color: 'white' }}>Baizona.com</div><div style={{ fontSize: '9px', color: '#fef3c7' }}>chimbo la machimbo</div></div>
+    <div onClick={onClick} style={{
+      background: "white", borderRadius: "12px", overflow: "hidden", border: "1px solid #eee",
+      cursor: "pointer", transition: "all 0.3s", boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+    }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.1)"; e.currentTarget.style.borderColor = "#ff6b00" }}
+       onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)"; e.currentTarget.style.borderColor = "#eee" }}>
+      <div style={{ height: "180px", background: "#fafafa", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+        <img src={shop.image} alt={shop.name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "cover" }} />
+        <div style={{ position: "absolute", top: "10px", right: "10px", background: "#ff6b00", color: "white", fontSize: "11px", fontWeight: "bold", padding: "4px 8px", borderRadius: "20px" }}>
+          ⭐ {shop.rating}
+        </div>
+      </div>
+      <div style={{ padding: "15px" }}>
+        <h3 style={{ fontSize: "16px", fontWeight: "bold", color: "#333", marginBottom: "5px" }}>{shop.name}</h3>
+        <div style={{ fontSize: "12px", color: "#666", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+          <span>📁 {shop.category}</span>
+          <span>📍 {shop.location}</span>
+        </div>
+        <div style={{ fontSize: "12px", color: "#ff6b00", marginBottom: "8px" }}>📦 Bidhaa: {shop.products}</div>
+        <div style={{ fontSize: "11px", color: "#888", lineHeight: "1.4" }}>{shop.description.substring(0, 60)}...</div>
+      </div>
+    </div>
+  )
+}
+
+// AGIZA CHINA COMPANY CARD (With Products Horizontal)
+const AgizaChinaCard = ({ company, onClick, onViewProduct }) => {
+  return (
+    <div onClick={onClick} style={{
+      background: "white", borderRadius: "16px", overflow: "hidden", border: "1px solid #eee",
+      cursor: "pointer", transition: "all 0.3s", marginBottom: "24px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+    }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.1)"; e.currentTarget.style.borderColor = "#ff6b00" }}
+       onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)"; e.currentTarget.style.borderColor = "#eee" }}>
+      
+      {/* Company Header */}
+      <div style={{ padding: "20px", display: "flex", gap: "20px", flexWrap: "wrap" }}>
+        <div style={{ width: "80px", height: "80px", borderRadius: "12px", overflow: "hidden", background: "#fafafa" }}>
+          <img src={company.logo} alt={company.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+            <h3 style={{ fontSize: "18px", fontWeight: "bold", color: "#333", margin: 0 }}>{company.name}</h3>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <span style={{ background: "#f5f5f5", padding: "4px 10px", borderRadius: "20px", fontSize: "11px", color: "#666" }}>⭐ {company.rating}</span>
+              <span style={{ background: "#f5f5f5", padding: "4px 10px", borderRadius: "20px", fontSize: "11px", color: "#666" }}>📅 {company.since}</span>
             </div>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: 'white' }}>{seller.shop_name}</div>
-            <div style={{ fontSize: '11px', color: '#fef3c7' }}>📧 {seller.email} | 📞 {seller.phone}</div>
-            <button onClick={onLogout} style={{ marginTop: '6px', padding: '6px 12px', background: 'white', color: '#f59e0b', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>🚪 Ondoka</button>
+          <div style={{ fontSize: "12px", color: "#888", marginTop: "5px", display: "flex", alignItems: "center", gap: "15px", flexWrap: "wrap" }}>
+            <span>📍 {company.location}</span>
+            <span>📞 {company.phone}</span>
           </div>
+          <p style={{ fontSize: "12px", color: "#666", marginTop: "10px", lineHeight: "1.5" }}>{company.description.substring(0, 100)}...</p>
         </div>
       </div>
       
-      <div style={{ background: 'white', padding: '12px 20px', borderBottom: '1px solid #e2e8f0' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'flex-end' }}>
-          <button onClick={() => alert('Kikapu kinapatikana kwenye ukurasa wa nyumbani. Bonyeza "Rudi Nyumbani" kuona kikapu chako.')} style={{ background: '#6366f1', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold' }}>🛒 Kikapu Changu</button>
+      {/* Products Horizontal Scroll */}
+      <div style={{ padding: "0 20px 20px 20px" }}>
+        <div style={{ fontSize: "12px", fontWeight: "bold", color: "#333", marginBottom: "10px" }}>📦 Bidhaa Tunazoagiza:</div>
+        <div style={{ display: "flex", gap: "15px", overflowX: "auto", paddingBottom: "10px" }}>
+          {company.products.map(product => (
+            <div 
+              key={product.id} 
+              onClick={(e) => { e.stopPropagation(); onViewProduct({ ...product, shop: company.name, sellerPhone: company.phone }) }} 
+              style={{ minWidth: "140px", background: "#fafafa", borderRadius: "10px", overflow: "hidden", cursor: "pointer", border: "1px solid #eee" }}
+            >
+              <div style={{ height: "100px", display: "flex", alignItems: "center", justifyContent: "center", padding: "10px" }}>
+                <img src={product.image} alt={product.name} style={{ maxWidth: "100%", maxHeight: "80px", objectFit: "contain" }} />
+              </div>
+              <div style={{ padding: "8px", background: "white" }}>
+                <h4 style={{ fontSize: "11px", fontWeight: "600", color: "#333", margin: "0 0 4px" }}>{product.name.substring(0, 25)}...</h4>
+                <div style={{ fontSize: "11px", fontWeight: "bold", color: "#ff6b00" }}>Tsh {fmt(product.price)}</div>
+                <div style={{ fontSize: "9px", color: "#888" }}>MOQ: {product.min_order}</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
+    </div>
+  )
+}
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
-          <button onClick={() => { setActiveTab('products'); fetchProducts() }} style={{ padding: '10px 20px', background: activeTab === 'products' ? '#f59e0b' : 'white', color: activeTab === 'products' ? 'white' : '#64748b', border: '1px solid #e2e8f0', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' }}>📋 Bidhaa Zangu ({products.length})</button>
-          <button onClick={() => setActiveTab('add')} style={{ padding: '10px 20px', background: activeTab === 'add' ? '#10b981' : 'white', color: activeTab === 'add' ? 'white' : '#64748b', border: '1px solid #e2e8f0', borderRadius: '10px', cursor: 'pointer' }}>➕ Ongeza Bidhaa</button>
+// AGIZA CHINA COMPANY DETAILS PAGE
+const AgizaChinaDetailsPage = ({ company, onBack, onViewProduct }) => {
+  const handleCall = () => window.open(`tel:${company.phone}`, "_blank")
+  const handleWhatsApp = () => window.open(`https://wa.me/${company.phone}`, "_blank")
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#f5f5f5" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" }}>
+        <button onClick={onBack} style={{ background: "#eee", border: "none", padding: "10px 20px", borderRadius: "30px", color: "#333", cursor: "pointer", marginBottom: "20px", fontWeight: "bold" }}>← Rudi kwenye Agiza China</button>
+        
+        <div style={{ background: "white", borderRadius: "20px", padding: "30px", marginBottom: "30px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
+          <div style={{ display: "flex", gap: "30px", flexWrap: "wrap" }}>
+            <div style={{ width: "120px", height: "120px", borderRadius: "16px", overflow: "hidden", background: "#fafafa" }}>
+              <img src={company.logo} alt={company.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h1 style={{ fontSize: "28px", color: "#333", marginBottom: "10px" }}>{company.name}</h1>
+              <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "15px" }}>
+                <span style={{ fontSize: "13px", color: "#666" }}>⭐ {company.rating} ★</span>
+                <span style={{ fontSize: "13px", color: "#666" }}>📍 {company.location}</span>
+                <span style={{ fontSize: "13px", color: "#666" }}>📅 Tangu {company.since}</span>
+              </div>
+              <p style={{ color: "#666", lineHeight: "1.6", marginBottom: "20px" }}>{company.description}</p>
+              <div style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}>
+                <button onClick={handleWhatsApp} style={{ padding: "12px 24px", background: "#25D366", border: "none", borderRadius: "10px", color: "white", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>💬 WhatsApp</button>
+                <button onClick={handleCall} style={{ padding: "12px 24px", background: "#4facfe", border: "none", borderRadius: "10px", color: "white", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>📞 Piga Simu</button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {activeTab === 'add' && (
-          <form onSubmit={handleAddProduct} style={{ background: 'white', padding: '24px', borderRadius: '16px' }}>
-            <h3>➕ Ongeza Bidhaa Mpya</h3>
-            <input type="text" placeholder="Jina la Bidhaa *" required value={newProduct.name} onChange={(e) => setNewProduct({...newProduct, name: e.target.value})} style={{ width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-            <input type="number" placeholder="Bei kwa kipande (Tsh) *" required value={newProduct.price} onChange={(e) => setNewProduct({...newProduct, price: e.target.value})} style={{ width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-            <textarea placeholder="Maelezo ya Bidhaa" value={newProduct.description} onChange={(e) => setNewProduct({...newProduct, description: e.target.value})} style={{ width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', minHeight: '80px' }} />
+        {/* Services */}
+        <div style={{ background: "white", borderRadius: "16px", padding: "25px", marginBottom: "30px" }}>
+          <h2 style={{ fontSize: "20px", color: "#333", marginBottom: "20px" }}>🛠️ Huduma Zetu</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
+            {company.services.map((service, idx) => (
+              <div key={idx} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px", background: "#fafafa", borderRadius: "10px" }}>
+                <span style={{ fontSize: "20px" }}>✅</span>
+                <span style={{ fontSize: "13px", color: "#555" }}>{service}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* How It Works */}
+        <div style={{ background: "white", borderRadius: "16px", padding: "25px", marginBottom: "30px" }}>
+          <h2 style={{ fontSize: "20px", color: "#333", marginBottom: "20px" }}>📋 Jinsi Tunavyofanya Kazi</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px" }}>
+            {company.howItWorks.map((step) => (
+              <div key={step.step} style={{ textAlign: "center" }}>
+                <div style={{ width: "50px", height: "50px", background: "#ff6b00", color: "white", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", fontWeight: "bold", margin: "0 auto 12px" }}>{step.step}</div>
+                <h4 style={{ fontSize: "14px", fontWeight: "bold", color: "#333", marginBottom: "5px" }}>{step.title}</h4>
+                <p style={{ fontSize: "11px", color: "#666" }}>{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Products */}
+        <h2 style={{ color: "#333", fontSize: "20px", marginBottom: "20px" }}>📦 Bidhaa Tunazoagiza</h2>
+        <div style={{ display: "flex", gap: "20px", overflowX: "auto", paddingBottom: "20px" }}>
+          {company.products.map(product => (
+            <div key={product.id} style={{ minWidth: "200px" }}>
+              <SmallProductCard product={product} onClick={() => onViewProduct({ ...product, shop: company.name, sellerPhone: company.phone })} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// SHOP DETAILS PAGE
+const ShopDetailsPage = ({ shop, onBack, onViewProduct, shopProducts }) => {
+  const handleCall = () => window.open(`tel:${shop.phone}`, "_blank")
+  const handleWhatsApp = () => window.open(`https://wa.me/${shop.phone}`, "_blank")
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#f5f5f5" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" }}>
+        <button onClick={onBack} style={{ background: "#eee", border: "none", padding: "10px 20px", borderRadius: "30px", color: "#333", cursor: "pointer", marginBottom: "20px", fontWeight: "bold" }}>← Rudi kwenye Machimbo</button>
+        
+        <div style={{ background: "white", borderRadius: "16px", padding: "30px", marginBottom: "30px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
+          <div style={{ display: "flex", gap: "30px", flexWrap: "wrap" }}>
+            <div style={{ width: "150px", height: "150px", background: "#fafafa", borderRadius: "12px", overflow: "hidden" }}>
+              <img src={shop.image} alt={shop.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <h1 style={{ fontSize: "28px", color: "#333", marginBottom: "10px" }}>{shop.name}</h1>
+              <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "15px" }}>
+                <span style={{ fontSize: "13px", color: "#666" }}>⭐ {shop.rating} ★</span>
+                <span style={{ fontSize: "13px", color: "#666" }}>📁 {shop.category}</span>
+                <span style={{ fontSize: "13px", color: "#666" }}>📍 {shop.location}</span>
+                <span style={{ fontSize: "13px", color: "#666" }}>📅 Tangu {shop.since}</span>
+              </div>
+              <p style={{ color: "#666", lineHeight: "1.6", marginBottom: "15px" }}>{shop.description}</p>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <button onClick={handleWhatsApp} style={{ padding: "10px 20px", background: "#25D366", border: "none", borderRadius: "8px", color: "white", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>💬 WhatsApp</button>
+                <button onClick={handleCall} style={{ padding: "10px 20px", background: "#4facfe", border: "none", borderRadius: "8px", color: "white", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>📞 Piga Simu</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <h2 style={{ color: "#333", fontSize: "20px", marginBottom: "20px" }}>📦 Bidhaa za {shop.name}</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px" }}>
+          {shopProducts.map(product => (
+            <ProductCard key={product.id} product={product} onClick={() => onViewProduct(product)} index={0} />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// PRODUCT DETAILS PAGE
+const ProductDetailsPage = ({ product, onAddToCart, onBack, onDirectOrder, onViewProduct, allProducts }) => {
+  const [quantity, setQuantity] = useState(product.min_order_quantity || 1)
+  
+  const similarProducts = allProducts.filter(p => p.id !== product.id && (p.category === product.category || p.shop === product.shop)).slice(0, 8)
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#f5f5f5" }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" }}>
+        <button onClick={onBack} style={{ background: "#eee", border: "none", padding: "10px 20px", borderRadius: "30px", color: "#333", cursor: "pointer", marginBottom: "20px", fontWeight: "bold" }}>← Rudi kwenye Bidhaa</button>
+        
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px", background: "white", borderRadius: "16px", padding: "30px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
+          <div>
+            <div style={{ background: "#fafafa", borderRadius: "12px", padding: "20px", display: "flex", justifyContent: "center", minHeight: "400px" }}>
+              <img src={product.image} alt={product.name} style={{ maxWidth: "100%", maxHeight: "400px", objectFit: "contain" }} />
+            </div>
+          </div>
+          
+          <div>
+            <div style={{ fontSize: "14px", color: "#ff6b00", marginBottom: "8px" }}>🏪 {product.shop}</div>
+            <h1 style={{ fontSize: "28px", color: "#333", marginBottom: "12px" }}>{product.name}</h1>
+            <StarRating rating={4.5} reviewCount={Math.floor(product.sold / 10)} />
             
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
-              <input type="number" placeholder="Kiwango cha chini (MOQ)" value={newProduct.min_order_quantity} onChange={(e) => setNewProduct({...newProduct, min_order_quantity: parseInt(e.target.value)})} style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-              <select value={newProduct.bulk_unit} onChange={(e) => setNewProduct({...newProduct, bulk_unit: e.target.value})} style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>{bulkUnits.map(u => <option key={u} value={u}>{u}</option>)}</select>
+            <div style={{ background: "#f5f5f5", borderRadius: "12px", padding: "20px", margin: "20px 0" }}>
+              <div style={{ fontSize: "32px", fontWeight: "bold", color: "#ff6b00" }}>Tsh {fmt(product.price)}</div>
+              <div style={{ fontSize: "13px", color: "#666", marginTop: "5px" }}>Bei ya jumla / {product.bulk_unit}</div>
             </div>
             
-            <select value={newProduct.wholesale_category} onChange={(e) => setNewProduct({...newProduct, wholesale_category: e.target.value})} style={{ width: '100%', padding: '12px', marginBottom: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>{wholesaleCategories.map(c => <option key={c} value={c}>{c}</option>)}</select>
-            
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>📸 Picha za Bidhaa (Unaweza kuchagua nyingi)</label>
-              <input type="file" accept="image/*" multiple onChange={handleImageUpload} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-              {productImagesPreview.length > 0 && (
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
-                  {productImagesPreview.map((preview, idx) => <img key={idx} src={preview} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px' }} />)}
-                </div>
-              )}
+            <div style={{ marginBottom: "20px" }}>
+              <div style={{ color: "#333", marginBottom: "10px", fontWeight: "bold" }}>📦 Kiasi cha kuagiza:</div>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <button onClick={() => setQuantity(Math.max(product.min_order_quantity || 1, quantity - (product.min_order_quantity || 1)))} style={{ width: "40px", height: "40px", borderRadius: "8px", border: "1px solid #ddd", background: "#f5f5f5", color: "#333", cursor: "pointer", fontWeight: "bold" }}>-</button>
+                <input type="number" value={quantity} onChange={e => setQuantity(Math.max(product.min_order_quantity || 1, parseInt(e.target.value) || 1))} style={{ width: "100px", textAlign: "center", padding: "10px", borderRadius: "8px", border: "1px solid #ddd", background: "white", color: "#333" }} />
+                <button onClick={() => setQuantity(quantity + (product.min_order_quantity || 1))} style={{ width: "40px", height: "40px", borderRadius: "8px", border: "1px solid #ddd", background: "#f5f5f5", color: "#333", cursor: "pointer", fontWeight: "bold" }}>+</button>
+                <span style={{ color: "#666", fontSize: "13px" }}>MOQ: {product.min_order_quantity} {product.bulk_unit}</span>
+              </div>
             </div>
             
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>🎨 Variants (Rangi, Ukubwa)</label>
-              {variants.map((v, idx) => (
-                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', padding: '8px', borderRadius: '8px', marginBottom: '8px' }}>
-                  <span><strong>{v.name}:</strong> {v.options.join(', ')}</span>
-                  <button type="button" onClick={() => removeVariant(idx)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>🗑️</button>
+            <div style={{ background: "#ff6b00", borderRadius: "12px", padding: "15px", marginBottom: "20px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "white", marginBottom: "8px" }}>
+                <span>Jumla ya Bidhaa:</span>
+                <span style={{ fontWeight: "bold" }}>{quantity} {product.bulk_unit}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "white", fontSize: "20px", fontWeight: "bold" }}>
+                <span>Jumla ya Bei:</span>
+                <span>Tsh {fmt(product.price * quantity)}</span>
+              </div>
+            </div>
+            
+            <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
+              <button onClick={() => onAddToCart(product, quantity)} style={{ flex: 1, padding: "14px", background: "#ff6b00", color: "white", border: "none", borderRadius: "10px", fontWeight: "bold", cursor: "pointer" }}>🛒 Weka Kikapuni</button>
+              <button onClick={() => onDirectOrder(product, quantity)} style={{ flex: 1, padding: "14px", background: "#25D366", color: "white", border: "none", borderRadius: "10px", fontWeight: "bold", cursor: "pointer" }}>💬 Agiza WhatsApp</button>
+            </div>
+            
+            <div style={{ borderTop: "1px solid #eee", paddingTop: "20px" }}>
+              <h3 style={{ color: "#333", marginBottom: "10px", fontSize: "16px" }}>Maelezo ya Bidhaa</h3>
+              <p style={{ color: "#666", lineHeight: "1.6" }}>{product.description}</p>
+            </div>
+          </div>
+        </div>
+
+        {similarProducts.length > 0 && (
+          <div style={{ marginTop: "40px" }}>
+            <h2 style={{ color: "#333", fontSize: "20px", marginBottom: "20px" }}>🔍 Bidhaa Zinazofanana</h2>
+            <div style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "10px" }}>
+              {similarProducts.map(similar => (
+                <div key={similar.id} style={{ minWidth: "200px" }}>
+                  <SmallProductCard product={similar} onClick={() => onViewProduct(similar)} />
                 </div>
               ))}
-              <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                <select value={newVariant.type} onChange={(e) => setNewVariant({...newVariant, type: e.target.value})} style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}><option value="color">Rangi</option><option value="size">Ukubwa</option></select>
-                <input type="text" placeholder="Chaguzi (Nyeusi,Nyekundu,Nyeupe)" value={newVariant.options} onChange={(e) => setNewVariant({...newVariant, options: e.target.value})} style={{ flex: 2, padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-                <button type="button" onClick={addVariant} style={{ padding: '10px 16px', background: '#f59e0b', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>➕</button>
-              </div>
             </div>
-            
-            <button type="submit" style={{ width: '100%', padding: '14px', background: '#10b981', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>✅ Weka Bidhaa</button>
-          </form>
-        )}
-
-        {activeTab === 'products' && (
-          <div>
-            {loading ? <p>Loading...</p> : products.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '60px', background: 'white', borderRadius: '16px' }}><p>Huna bidhaa bado. Bonyeza "Ongeza Bidhaa" kuanza!</p></div>
-            ) : (
-              products.map(product => (
-                <div key={product.id} style={{ background: 'white', borderRadius: '12px', marginBottom: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', padding: '16px', gap: '16px', flexWrap: 'wrap' }}>
-                    <img src={product.images?.[0] || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500'} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px' }} />
-                    <div style={{ flex: 1 }}>
-                      <h4>{product.name}</h4>
-                      <p style={{ fontSize: '12px', color: '#64748b' }}>Tsh {product.price.toLocaleString()} / {product.bulk_unit}</p>
-                      <p style={{ fontSize: '11px', color: '#f59e0b' }}>MOQ: {product.min_order_quantity} {product.bulk_unit}</p>
-                    </div>
-                    <div><span style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '20px', background: '#10b981', color: 'white' }}>Active</span></div>
-                    <button onClick={() => handleDeleteProduct(product.id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px' }}>🗑️</button>
-                  </div>
-                </div>
-              ))
-            )}
           </div>
         )}
       </div>
@@ -210,516 +484,630 @@ const SellerDashboard = ({ seller, onLogout, onBackToHome }) => {
   )
 }
 
-// ============ SELLER AUTH ============
-const SellerAuth = ({ onLogin, onBack }) => {
-  const [isLogin, setIsLogin] = useState(true)
-  const [form, setForm] = useState({ email: '', password: '', shop_name: '', phone: '', location: 'Kariakoo, Dar es Salaam' })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+// CHECKOUT MODAL
+const CheckoutModal = ({ isOpen, onClose, onConfirm, sellerName, total }) => {
+  const [customer, setCustomer] = useState(() => {
+    const saved = localStorage.getItem("baizona_customer")
+    return saved ? JSON.parse(saved) : { name: "", phone: "", address: "" }
+  })
 
-  const handleSubmit = async (e) => {
-    e.preventDefault(); setLoading(true); setError('')
-    if (isLogin) {
-      const { data, error } = await supabase.from('sellers').select('*').eq('email', form.email).eq('password', form.password).single()
-      if (error || !data) setError('Email au password si sahihi!')
-      else { localStorage.setItem('baizona_seller', JSON.stringify(data)); onLogin(data) }
-    } else {
-      const { data, error } = await supabase.from('sellers').insert([{ email: form.email, password: form.password, shop_name: form.shop_name, phone: form.phone, location: form.location }]).select().single()
-      if (error) setError(error.message)
-      else { localStorage.setItem('baizona_seller', JSON.stringify(data)); onLogin(data) }
+  useEffect(() => {
+    if (customer.name && customer.phone) {
+      localStorage.setItem("baizona_customer", JSON.stringify(customer))
     }
-    setLoading(false)
-  }
+  }, [customer])
+
+  if (!isOpen) return null
 
   return (
-    <div style={{ maxWidth: '500px', margin: '40px auto', padding: '20px' }}>
-      <div style={{ textAlign: 'center', marginBottom: '20px' }}><div style={{ width: '60px', height: '60px', background: 'linear-gradient(135deg, #f59e0b, #d97706)', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', color: 'white', margin: '0 auto' }}>🏪</div><h1>{isLogin ? 'Ingia Dukani' : 'Jiunge na Baizona'}</h1></div>
-      {error && <div style={{ background: '#fef2f2', color: '#ef4444', padding: '12px', borderRadius: '8px', marginBottom: '16px' }}>❌ {error}</div>}
-      <form onSubmit={handleSubmit} style={{ background: 'white', padding: '24px', borderRadius: '16px' }}>
-        {!isLogin && (
-          <>
-            <input type="text" placeholder="Jina la Duka *" required value={form.shop_name} onChange={(e) => setForm({...form, shop_name: e.target.value})} style={{ width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-            <input type="tel" placeholder="Simu (WhatsApp) *" required value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} style={{ width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-            <input type="text" placeholder="Mahali" value={form.location} onChange={(e) => setForm({...form, location: e.target.value})} style={{ width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-          </>
-        )}
-        <input type="email" placeholder="Barua pepe *" required value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} style={{ width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-        <input type="password" placeholder="Password *" required value={form.password} onChange={(e) => setForm({...form, password: e.target.value})} style={{ width: '100%', padding: '12px', marginBottom: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-        <button type="submit" disabled={loading} style={{ width: '100%', padding: '14px', background: '#f59e0b', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}>{loading ? 'Inasubiri...' : (isLogin ? '🚀 Ingia' : '✅ Jiunge')}</button>
-      </form>
-      <p style={{ textAlign: 'center', marginTop: '20px' }}><button onClick={() => { setIsLogin(!isLogin); setError('') }} style={{ background: 'none', border: 'none', color: '#6366f1', cursor: 'pointer' }}>{isLogin ? 'Huna akaunti? Jiunge Sasa' : 'Tayari una akaunti? Ingia'}</button><br /><button onClick={onBack} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', marginTop: '10px' }}>🔙 Rudi</button></p>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
+      <div style={{ background: "white", borderRadius: "20px", maxWidth: "500px", width: "100%", padding: "30px" }}>
+        <h2 style={{ color: "#333", marginBottom: "10px" }}>📝 Anza Kuagiza</h2>
+        <p style={{ color: "#666", marginBottom: "20px", fontSize: "13px" }}>Tafadhali jaza maelezo yako hapa chini</p>
+        
+        <div style={{ marginBottom: "20px", padding: "15px", background: "#f5f5f5", borderRadius: "12px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+            <span style={{ color: "#666" }}>Duka:</span>
+            <span style={{ color: "#ff6b00", fontWeight: "bold" }}>{sellerName}</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span style={{ color: "#666" }}>Jumla:</span>
+            <span style={{ color: "#ff6b00", fontWeight: "bold" }}>Tsh {fmt(total)}</span>
+          </div>
+        </div>
+        
+        <input type="text" placeholder="👤 Jina lako kamili" value={customer.name} onChange={e => setCustomer({...customer, name: e.target.value})} style={{ width: "100%", padding: "14px", marginBottom: "12px", borderRadius: "10px", border: "1px solid #ddd", background: "white", color: "#333" }} />
+        <input type="tel" placeholder="📞 Namba ya WhatsApp" value={customer.phone} onChange={e => setCustomer({...customer, phone: e.target.value})} style={{ width: "100%", padding: "14px", marginBottom: "12px", borderRadius: "10px", border: "1px solid #ddd", background: "white", color: "#333" }} />
+        <textarea placeholder="📍 Anwani yako (Mtaa, Jiji)" value={customer.address} onChange={e => setCustomer({...customer, address: e.target.value})} rows="3" style={{ width: "100%", padding: "14px", marginBottom: "20px", borderRadius: "10px", border: "1px solid #ddd", background: "white", color: "#333", resize: "none" }} />
+        
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button onClick={onClose} style={{ flex: 1, padding: "12px", background: "#f5f5f5", border: "none", borderRadius: "10px", color: "#666", cursor: "pointer" }}>Ghairi</button>
+          <button onClick={() => onConfirm(customer)} style={{ flex: 1, padding: "12px", background: "#ff6b00", border: "none", borderRadius: "10px", color: "white", fontWeight: "bold", cursor: "pointer" }}>✅ Thibitisha & Agiza</button>
+        </div>
+      </div>
     </div>
   )
 }
 
-// ============ MAIN APP ============
-function App() {
-  const [products, setProducts] = useState([])
-  const [shops, setShops] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [selectedCategory, setSelectedCategory] = useState("Machimbo Yote")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [shopSearchQuery, setShopSearchQuery] = useState("")
-  const [showCart, setShowCart] = useState(false)
-  const [quantities, setQuantities] = useState({})
-  const [selectedVariants, setSelectedVariants] = useState({})
-  const [showSellerAuth, setShowSellerAuth] = useState(false)
-  const [page, setPage] = useState("home")
-  const [selectedProduct, setSelectedProduct] = useState(null)
-  const [selectedShop, setSelectedShop] = useState(null)
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-  
-  const { items, addItem, removeItem, updateQuantity, clearCart, getTotalItems, getGroupedBySeller } = useCartStore()
-  
-  const [seller, setSeller] = useState(() => {
-    const saved = localStorage.getItem('baizona_seller')
-    if (saved) {
-      try { return JSON.parse(saved) }
-      catch(e) { return null }
+// CART PAGE
+const CartPage = ({ onClose }) => {
+  const { items, removeItem, updateQuantity, getTotalItems, getTotalPrice, getGroupedBySeller, clearCart } = useCartStore()
+  const [showCheckoutModal, setShowCheckoutModal] = useState(null)
+  const [pendingOrder, setPendingOrder] = useState(null)
+
+  const handleProceedToOrder = (sellerId, sellerName, sellerPhone, sellerItems) => {
+    const total = sellerItems.reduce((s, i) => s + i.price * i.quantity, 0)
+    setPendingOrder({ sellerId, sellerName, sellerPhone, sellerItems, total })
+    setShowCheckoutModal(true)
+  }
+
+  const handleConfirmOrder = (customer) => {
+    if (!customer.name || !customer.phone) {
+      showToast("❌ Tafadhali jaza jina na namba ya simu!", "error")
+      return
     }
-    return null
-  })
-
-  const handleSellerLogout = () => { localStorage.removeItem('baizona_seller'); setSeller(null); setShowSellerAuth(false) }
-  const handleSellerLogin = (data) => { localStorage.setItem('baizona_seller', JSON.stringify(data)); setSeller(data); setShowSellerAuth(false) }
-
-  // Detect mobile for grid layout
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768)
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  // Handle browser back button
-  useEffect(() => {
-    const handlePopState = () => {
-      if (page !== 'home') {
-        setPage('home')
-        setShowCart(false)
-      }
-    }
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [page])
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true)
-      let query = supabase.from('products').select('*')
-      if (selectedCategory !== "Machimbo Yote") {
-        query = query.eq('wholesale_category', selectedCategory)
-      }
-      const { data: productsData } = await query.order('id', { ascending: false }).limit(100)
-      if (productsData) setProducts(productsData)
-      
-      const { data: shopsData } = await supabase.from('shops').select('*')
-      if (shopsData) setShops(shopsData)
-      setLoading(false)
-    }
-    fetchData()
-  }, [selectedCategory])
-
-  const filteredProducts = products.filter(p => 
-    p.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    p.shop?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  const filteredShops = shops.filter(shop => 
-    shop.name?.toLowerCase().includes(shopSearchQuery.toLowerCase()) ||
-    shop.location?.toLowerCase().includes(shopSearchQuery.toLowerCase()) ||
-    shop.category?.toLowerCase().includes(shopSearchQuery.toLowerCase())
-  )
-
-  const shopProducts = products.filter(p => p.shop === selectedShop?.name)
-
-  const getShop = (shopName) => shops.find(s => s.name === shopName) || { phone: "255700000000", name: shopName, location: "Kariakoo, Dar es Salaam" }
-  const setQuantity = (productId, quantity) => setQuantities(prev => ({ ...prev, [productId]: Math.max(1, quantity) }))
-  const getQuantity = (productId) => quantities[productId] || 1
-  const setVariant = (productId, variantType, value) => setSelectedVariants(prev => ({ ...prev, [productId]: { ...prev[productId], [variantType]: value } }))
-  const getVariant = (productId, variantType) => selectedVariants[productId]?.[variantType] || ""
-
-  const showToast = (message) => {
-    const toast = document.createElement('div')
-    toast.innerHTML = `<div style="position:fixed;top:80px;right:20px;background:#10b981;color:white;padding:12px 20px;border-radius:12px;z-index:9999;animation:slideIn 0.3s ease;">${message}</div>`
-    document.body.appendChild(toast); setTimeout(() => toast.remove(), 3000)
+    
+    const { sellerName, sellerPhone, sellerItems, total } = pendingOrder
+    const itemList = sellerItems.map(i => `• ${i.name} x${i.quantity} = Tsh ${fmt(i.price * i.quantity)}`).join("\n")
+    
+    const message = `🏪 *AGIZO KUTOKA BAIZONA - CHIMBO LA MACHIMBO*\n\n` +
+      `*Duka:* ${sellerName}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `*BIDHAA ZILIZOAGIZWA:*\n${itemList}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `*JUMLA:* Tsh ${fmt(total)}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `*MAELEZO YA MNUNUZI:*\n` +
+      `👤 *Jina:* ${customer.name}\n` +
+      `📞 *Simu:* ${customer.phone}\n` +
+      `📍 *Anwani:* ${customer.address || "Hajajaza anwani"}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `Asante kwa kununua kwa jumla! 🙏`
+    
+    window.open(`https://wa.me/${sellerPhone || "255700000000"}?text=${encodeURIComponent(message)}`, "_blank")
+    showToast(`✅ Agizo lako limetumwa kwa ${sellerName}!`, "success")
+    setShowCheckoutModal(false)
+    setPendingOrder(null)
   }
 
-  if (seller) {
-    return <SellerDashboard seller={seller} onLogout={handleSellerLogout} onBackToHome={() => {
-      localStorage.removeItem('baizona_seller')
-      setSeller(null)
-      setPage('home')
-      setShowCart(false)
-    }} />
+  if (items.length === 0) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#f5f5f5" }}>
+        <div style={{ background: "white", padding: "15px 20px", boxShadow: "0 2px 5px rgba(0,0,0,0.05)" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ fontSize: "22px", fontWeight: "bold", color: "#ff6b00" }}>BAIZONA</div>
+            <button onClick={onClose} style={{ background: "#ff6b00", border: "none", padding: "8px 24px", borderRadius: "30px", color: "white", cursor: "pointer" }}>← Rudi</button>
+          </div>
+        </div>
+        <div style={{ textAlign: "center", padding: "80px 20px" }}>
+          <div style={{ fontSize: "80px", marginBottom: "20px" }}>🛒</div>
+          <h2 style={{ color: "#333" }}>Kikapu Chako ni Tupu</h2>
+          <button onClick={onClose} style={{ marginTop: "20px", padding: "12px 30px", background: "#ff6b00", border: "none", borderRadius: "30px", color: "white", cursor: "pointer" }}>Anza Kununua →</button>
+        </div>
+      </div>
+    )
   }
 
-  if (showSellerAuth) {
-    return <SellerAuth onLogin={handleSellerLogin} onBack={() => setShowSellerAuth(false)} />
-  }
-
-  if (loading) {
-    return <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><div style={{ textAlign: 'center' }}><div style={{ fontSize: '50px', marginBottom: '10px' }}>🏪</div><p>Loading Baizona...</p></div></div>
-  }
-
-  // GRID COLUMNS: 3 columns on mobile, auto on desktop
-  const gridCols = isMobile ? 'repeat(3, 1fr)' : 'repeat(auto-fill, minmax(220px, 1fr))'
-  const shopsGridCols = isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(300px, 1fr))'
+  const sellerGroups = getGroupedBySeller()
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: isMobile ? '70px' : '0px' }}>
+    <div style={{ minHeight: "100vh", background: "#f5f5f5" }}>
+      <CheckoutModal isOpen={showCheckoutModal} onClose={() => setShowCheckoutModal(false)} onConfirm={handleConfirmOrder} sellerName={pendingOrder?.sellerName} total={pendingOrder?.total} />
       
-      {/* HEADER - Only visible on desktop, hidden on mobile (nav at bottom) */}
-      {!isMobile && (
-        <div style={{ 
-          position: 'sticky', 
-          top: 0, 
-          zIndex: 100, 
-          background: 'linear-gradient(135deg, #f59e0b, #d97706)', 
-          padding: '12px 20px', 
-          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-          borderBottom: 'none'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', maxWidth: '1200px', margin: '0 auto' }}>
-            <div onClick={() => { setPage('home'); setShowCart(false) }} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '45px', height: '45px', background: 'white', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', fontWeight: 'bold', color: '#f59e0b', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>B</div>
-              <div><div style={{ fontSize: '20px', fontWeight: 'bold', color: 'white', letterSpacing: '1px' }}>Baizona.com</div><div style={{ fontSize: '10px', color: '#fef3c7' }}>chimbo la machimbo</div></div>
-            </div>
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-              <button onClick={() => setShowSellerAuth(true)} style={{ background: 'white', color: '#f59e0b', border: 'none', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>🏪 Kuuza</button>
-              <button onClick={() => { setPage('home'); setShowCart(false) }} style={{ background: 'transparent', border: 'none', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold', color: 'white' }}>🏠 Nyumbani</button>
-              <button onClick={() => { setPage('shops'); setShowCart(false) }} style={{ background: 'transparent', border: 'none', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold', color: 'white' }}>🏪 Machimbo</button>
-              <button onClick={() => setShowCart(true)} style={{ position: 'relative', background: 'transparent', border: 'none', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', color: 'white' }}>
-                🛒 Kikapu
-                {getTotalItems() > 0 && <span style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#ef4444', color: 'white', fontSize: '10px', borderRadius: '50%', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{getTotalItems()}</span>}
-              </button>
-            </div>
+      <div style={{ background: "white", padding: "15px 20px", borderBottom: "1px solid #eee", position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+          <div><div style={{ fontSize: "22px", fontWeight: "bold", color: "#ff6b00" }}>BAIZONA</div><div style={{ fontSize: "10px", color: "#999" }}>Chimbo la Machimbo</div></div>
+          <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+            <span style={{ color: "#333" }}>📦 {getTotalItems()} bidhaa</span>
+            <button onClick={onClose} style={{ background: "#f5f5f5", border: "none", padding: "8px 20px", borderRadius: "30px", color: "#666", cursor: "pointer" }}>← Endelea Kununua</button>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* MOBILE HEADER - Small top bar (only logo) */}
-      {isMobile && (
-        <div style={{ 
-          position: 'sticky', 
-          top: 0, 
-          zIndex: 100, 
-          background: 'linear-gradient(135deg, #f59e0b, #d97706)', 
-          padding: '10px 16px', 
-          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div onClick={() => { setPage('home'); setShowCart(false) }} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '35px', height: '35px', background: 'white', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold', color: '#f59e0b' }}>B</div>
-            <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'white' }}>Baizona.com</div>
-          </div>
-          <button onClick={() => setShowSellerAuth(true)} style={{ background: 'white', color: '#f59e0b', border: 'none', padding: '5px 12px', borderRadius: '20px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}>🏪 Kuuza</button>
-        </div>
-      )}
-
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: isMobile ? '12px' : '20px' }}>
-        
-        {/* CART PAGE */}
-        {showCart ? (
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 350px", gap: "30px" }}>
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ margin: 0, fontSize: '20px', color: '#1e293b' }}>🛒 Kikapu Changu</h2>
-              <button onClick={() => setShowCart(false)} style={{ background: '#f1f5f9', border: 'none', padding: '6px 12px', borderRadius: '20px', cursor: 'pointer', fontSize: '12px', color: '#1e293b' }}>← Rudi</button>
-            </div>
-            
-            {items.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px', background: 'white', borderRadius: '16px' }}>
-                <div style={{ fontSize: '50px', marginBottom: '16px' }}>🛒</div>
-                <p style={{ marginBottom: '16px', color: '#64748b' }}>Kikapu chako ni tupu.</p>
-                <button onClick={() => setShowCart(false)} style={{ padding: '8px 16px', background: '#f59e0b', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' }}>🏠 Endelea Kununua</button>
-              </div>
-            ) : (
-              <>
-                {Object.entries(getGroupedBySeller()).map(([sellerId, { sellerName, sellerPhone, items: sellerItems }]) => {
-                  const sellerTotal = sellerItems.reduce((sum, i) => sum + (i.price * i.quantity), 0)
-                  return (
-                    <div key={sellerId} style={{ background: 'white', borderRadius: '16px', marginBottom: '16px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                      <div style={{ padding: '12px', background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: 'white' }}>
-                        <div><span style={{ fontSize: '16px', fontWeight: 'bold' }}>🏪 {sellerName}</span></div>
-                      </div>
-                      {sellerItems.map(item => (
-                        <div key={`${item.id}-${item.variant}`} style={{ padding: '12px', borderBottom: '1px solid #e2e8f0' }}>
-                          <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
-                            <img src={item.image} alt={item.name} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '8px' }} />
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontWeight: 'bold' }}>{item.name}</div>
-                              {item.variantDisplay && <div style={{ fontSize: '11px', color: '#64748b' }}>{item.variantDisplay}</div>}
-                              <div style={{ fontSize: '12px', color: '#f59e0b' }}>Tsh {item.price.toLocaleString()} / {item.unit}</div>
-                            </div>
-                            <div style={{ textAlign: 'right' }}>
-                              <div style={{ fontWeight: 'bold' }}>Tsh {(item.price * item.quantity).toLocaleString()}</div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
-                                <button onClick={() => updateQuantity(item.id, item.variant, item.quantity - 1)} style={{ width: '28px', height: '28px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#fef2f2', cursor: 'pointer' }}>-</button>
-                                <span>{item.quantity}</span>
-                                <button onClick={() => updateQuantity(item.id, item.variant, item.quantity + 1)} style={{ width: '28px', height: '28px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#ecfdf5', cursor: 'pointer' }}>+</button>
-                                <button onClick={() => removeItem(item.id, item.variant)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '18px' }}>🗑️</button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      <div style={{ padding: '12px', background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-                        <div><strong>Jumla: Tsh {sellerTotal.toLocaleString()}</strong></div>
-                        <button onClick={() => { const itemList = sellerItems.map(i => `${i.name}${i.variantDisplay ? ` (${i.variantDisplay})` : ''} x${i.quantity} = Tsh ${(i.price * i.quantity).toLocaleString()}`).join('\n'); const msg = `🏪 AGIZO KUTOKA BAIZONA\n\nDuka: ${sellerName}\nBidhaa:\n${itemList}\n💰 Jumla: Tsh ${sellerTotal.toLocaleString()}\n\n👤 Jina: [Jina]\n📍 Anwani: [Anwani]\n📱 Simu: [Namba]\n\nAsante!`; window.open(`https://wa.me/${sellerPhone || '255700000000'}?text=${encodeURIComponent(msg)}`, '_blank') }} style={{ padding: '8px 16px', background: '#25D366', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' }}>📱 Agiza</button>
-                      </div>
-                    </div>
-                  )
-                })}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                  <div><strong>Jumla Kuu: Tsh {items.reduce((sum, i) => sum + (i.price * i.quantity), 0).toLocaleString()}</strong></div>
-                  <button onClick={() => clearCart()} style={{ padding: '8px 16px', background: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca', borderRadius: '10px', cursor: 'pointer' }}>🗑️ Futa Kikapu</button>
-                </div>
-                
-                <div style={{ marginTop: '20px', background: 'linear-gradient(135deg, #eef2ff, #f3e8ff)', padding: '16px', borderRadius: '16px', border: '2px solid #f59e0b', textAlign: 'center' }}>
-                  <div style={{ fontSize: '35px' }}>🚚</div>
-                  <h3 style={{ fontSize: '16px', color: '#f59e0b' }}>Baizona Delivery</h3>
-                  <p style={{ fontSize: '12px', marginBottom: '10px' }}>Una bidhaa kutoka machimbo tofauti? Baizona itakusanyia bidhaa zako zote na kukuletea!</p>
-                  <button onClick={() => { const allItems = items.map(i => `${i.name} x${i.quantity} = Tsh ${(i.price * i.quantity).toLocaleString()}`).join('\n'); const total = items.reduce((sum, i) => sum + (i.price * i.quantity), 0); const msg = `🚚 AGIZO LA BAIZONA DELIVERY\n\nBidhaa zote:\n${allItems}\n💰 Jumla: Tsh ${total.toLocaleString()}\n\n👤 Jina: [Jina]\n📍 Anwani: [Anwani]\n📱 Simu: [Namba]\n\nAsante!`; window.open(`https://wa.me/255698656019?text=${encodeURIComponent(msg)}`, '_blank') }} style={{ padding: '10px', background: '#f59e0b', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', width: '100%' }}>🚚 Agiza Delivery</button>
-                </div>
-              </>
-            )}
-          </div>
-        ) : page === 'productDetails' && selectedProduct && selectedShop ? (
-          /* PRODUCT DETAILS PAGE */
-          <div>
-            <button onClick={() => setPage('home')} style={{ background: 'none', border: 'none', color: '#f59e0b', cursor: 'pointer', marginBottom: '16px', fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>← Rudi</button>
-            <div style={{ background: 'white', borderRadius: '16px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-              <div style={{ padding: '16px' }}>
-                <img src={selectedProduct.images?.[selectedImageIndex] || selectedProduct.images?.[0] || selectedProduct.image} alt={selectedProduct.name} style={{ width: '100%', height: '250px', objectFit: 'contain', background: '#f8fafc', borderRadius: '12px' }} />
-                {selectedProduct.images?.length > 1 && (
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '10px', overflowX: 'auto' }}>
-                    {selectedProduct.images.map((img, idx) => <img key={idx} src={img} onClick={() => setSelectedImageIndex(idx)} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '8px', border: selectedImageIndex === idx ? '2px solid #f59e0b' : '1px solid #e2e8f0', cursor: 'pointer' }} />)}
+            <h3 style={{ color: "#333", marginBottom: "20px" }}>🛒 Bidhaa Zako za Jumla</h3>
+            {Object.entries(sellerGroups).map(([sellerId, { sellerName, sellerPhone, items: sellerItems }]) => {
+              const sellerTotal = sellerItems.reduce((s, i) => s + i.price * i.quantity, 0)
+              const totalItems = sellerItems.reduce((s, i) => s + i.quantity, 0)
+              
+              return (
+                <div key={sellerId} style={{ background: "white", borderRadius: "16px", marginBottom: "20px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                  <div style={{ padding: "15px 20px", background: "#fff5eb", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+                    <div><span style={{ fontSize: "16px", fontWeight: "bold", color: "#ff6b00" }}>🏪 {sellerName}</span><span style={{ marginLeft: "10px", fontSize: "12px", color: "#888" }}>({totalItems} bidhaa)</span></div>
+                    <div style={{ fontSize: "14px", color: "#ff6b00", fontWeight: "bold" }}>Jumla: Tsh {fmt(sellerTotal)}</div>
                   </div>
-                )}
-                <div style={{ marginTop: '16px' }}>
-                  <div style={{ fontSize: '12px', color: '#64748b' }}>🏪 {selectedShop.name}</div>
-                  <h1 style={{ fontSize: '20px', marginBottom: '8px' }}>{selectedProduct.name}</h1>
-                  <div><span style={{ fontSize: '24px', fontWeight: 'bold', color: '#f59e0b' }}>Tsh {selectedProduct.price?.toLocaleString()}</span><span style={{ fontSize: '14px', color: '#64748b' }}> / {selectedProduct.bulk_unit}</span></div>
                   
-                  {selectedProduct.min_order_quantity > 1 && <div style={{ background: '#fef3c7', padding: '8px', borderRadius: '8px', margin: '12px 0' }}>⚡ MOQ: {selectedProduct.min_order_quantity} {selectedProduct.bulk_unit}</div>}
-                  
-                  {selectedProduct.variants?.map(variant => (
-                    <div key={variant.type} style={{ marginBottom: '12px' }}>
-                      <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '6px', fontSize: '13px' }}>🎨 {variant.name}:</label>
-                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        {variant.options.map(option => (
-                          <button key={option} onClick={() => setVariant(selectedProduct.id, variant.type, option)} style={{ padding: '6px 12px', borderRadius: '20px', border: '2px solid', borderColor: getVariant(selectedProduct.id, variant.type) === option ? '#f59e0b' : '#e2e8f0', background: getVariant(selectedProduct.id, variant.type) === option ? '#fef3c7' : 'white', color: getVariant(selectedProduct.id, variant.type) === option ? '#f59e0b' : '#64748b', cursor: 'pointer', fontSize: '12px' }}>
-                            {variant.type === 'color' && <span style={{ display: 'inline-block', width: '12px', height: '12px', borderRadius: '50%', background: colorMap[option] || '#94a3b8', marginRight: '6px' }}></span>}{option}
-                          </button>
-                        ))}
+                  {sellerItems.map(item => (
+                    <div key={item.id} style={{ padding: "15px 20px", borderBottom: "1px solid #f5f5f5", display: "flex", gap: "15px", alignItems: "center" }}>
+                      <img src={item.image} style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "10px" }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ color: "#333", fontWeight: "bold", marginBottom: "4px" }}>{item.name}</div>
+                        <div style={{ color: "#ff6b00", fontSize: "13px", fontWeight: "bold" }}>Tsh {fmt(item.price)} / {item.unit}</div>
                       </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <button onClick={() => updateQuantity(item.id, item.variant, item.quantity - 1)} style={{ width: "32px", height: "32px", borderRadius: "8px", border: "1px solid #ddd", background: "#f5f5f5", color: "#333", cursor: "pointer" }}>-</button>
+                        <span style={{ color: "#333", minWidth: "30px", textAlign: "center", fontWeight: "bold" }}>{item.quantity}</span>
+                        <button onClick={() => updateQuantity(item.id, item.variant, item.quantity + 1)} style={{ width: "32px", height: "32px", borderRadius: "8px", border: "1px solid #ddd", background: "#f5f5f5", color: "#333", cursor: "pointer" }}>+</button>
+                        <button onClick={() => removeItem(item.id, item.variant)} style={{ background: "none", border: "none", color: "#ff4444", cursor: "pointer", fontSize: "18px" }}>🗑️</button>
+                      </div>
+                      <div style={{ color: "#333", fontWeight: "bold", minWidth: "100px", textAlign: "right" }}>Tsh {fmt(item.price * item.quantity)}</div>
                     </div>
                   ))}
                   
-                  <div style={{ marginBottom: '12px' }}>
-                    <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '6px', fontSize: '13px' }}>📦 Kiasi:</label>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                      {[1, 5, 10, 20, 50, 100].map(q => <button key={q} onClick={() => setQuantity(selectedProduct.id, q)} style={{ padding: '5px 12px', borderRadius: '20px', border: 'none', background: getQuantity(selectedProduct.id) === q ? '#f59e0b' : '#f1f5f9', color: getQuantity(selectedProduct.id) === q ? 'white' : '#64748b', cursor: 'pointer', fontSize: '12px' }}>{q}</button>)}
-                      <input type="number" value={getQuantity(selectedProduct.id)} onChange={(e) => setQuantity(selectedProduct.id, parseInt(e.target.value) || 1)} min={selectedProduct.min_order_quantity || 1} style={{ width: '70px', padding: '6px', borderRadius: '20px', border: '1px solid #e2e8f0', textAlign: 'center', fontSize: '14px' }} />
-                    </div>
-                  </div>
-                  
-                  <div style={{ background: '#fef3c7', padding: '10px', borderRadius: '10px', marginBottom: '16px', textAlign: 'center' }}>💰 Jumla: <strong style={{ fontSize: '18px', color: '#f59e0b' }}>Tsh {(selectedProduct.price * getQuantity(selectedProduct.id)).toLocaleString()}</strong></div>
-                  
-                  <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
-                    <button onClick={() => { addItem({ id: selectedProduct.id, name: selectedProduct.name, price: selectedProduct.price, quantity: getQuantity(selectedProduct.id), image: selectedProduct.images?.[0] || selectedProduct.image, sellerId: selectedShop.id, sellerName: selectedShop.name, sellerPhone: selectedShop.phone, unit: selectedProduct.bulk_unit || 'pcs', variantDisplay: Object.entries(selectedVariants[selectedProduct.id] || {}).map(([k, v]) => `${k}: ${v}`).join(', ') }); showToast(`✅ ${selectedProduct.name} imeongezwa kwenye kikapu!`) }} style={{ padding: '10px', background: '#6366f1', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' }}>🛒 Weka Kikapuni</button>
-                    <button onClick={() => { const variantText = Object.entries(selectedVariants[selectedProduct.id] || {}).map(([k, v]) => `${k}: ${v}`).join(', '); const msg = `🏭 AGIZO LA JUMLA - BAIZONA\n\nBidhaa: ${selectedProduct.name}\n${variantText ? `🎨 ${variantText}\n` : ''}💰 Bei: Tsh ${selectedProduct.price?.toLocaleString()} / ${selectedProduct.bulk_unit}\n📦 Kiasi: ${getQuantity(selectedProduct.id)}\n💵 Jumla: Tsh ${(selectedProduct.price * getQuantity(selectedProduct.id)).toLocaleString()}\n\n👤 Namba: [Ingiza]\n📍 Anwani: [Weka]\n\nAsante!`; window.open(`https://wa.me/${selectedShop.phone || '255700000000'}?text=${encodeURIComponent(msg)}`, '_blank') }} style={{ padding: '10px', background: '#25D366', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' }}>💬 Agiza WhatsApp</button>
-                  </div>
-                  
-                  <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e2e8f0' }}>
-                    <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>📍 {selectedShop.location || 'Kariakoo, Dar es Salaam'}</p>
-                    <p style={{ fontSize: '12px', color: '#64748b' }}>📞 {selectedShop.phone || 'Namba haijajazwa'}</p>
+                  <div style={{ padding: "15px 20px", background: "#fafafa", display: "flex", justifyContent: "flex-end" }}>
+                    <button onClick={() => handleProceedToOrder(sellerId, sellerName, sellerPhone, sellerItems)} style={{ padding: "10px 24px", background: "#25D366", border: "none", borderRadius: "10px", color: "white", cursor: "pointer", fontWeight: "bold", display: "flex", alignItems: "center", gap: "8px" }}>
+                      📱 Agiza Sasa
+                    </button>
                   </div>
                 </div>
+              )
+            })}
+          </div>
+          
+          <div style={{ position: "sticky", top: "100px" }}>
+            <div style={{ background: "white", borderRadius: "16px", padding: "20px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+              <h3 style={{ color: "#333", marginBottom: "20px", paddingBottom: "10px", borderBottom: "1px solid #eee" }}>📦 Jumla ya Agizo</h3>
+              <div style={{ marginBottom: "15px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}><span style={{ color: "#666" }}>Bidhaa ({getTotalItems()})</span><span style={{ color: "#333" }}>Tsh {fmt(getTotalPrice())}</span></div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}><span style={{ color: "#666" }}>Delivery</span><span style={{ color: "#10b981" }}>Tsh 0 (Free)</span></div>
               </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px", paddingTop: "15px", borderTop: "1px solid #eee" }}>
+                <span style={{ fontSize: "18px", fontWeight: "bold", color: "#333" }}>Jumla Kuu:</span>
+                <span style={{ fontSize: "22px", fontWeight: "bold", color: "#ff6b00" }}>Tsh {fmt(getTotalPrice())}</span>
+              </div>
+              <button onClick={clearCart} style={{ width: "100%", padding: "12px", background: "#f5f5f5", border: "1px solid #ddd", borderRadius: "12px", color: "#ff4444", cursor: "pointer" }}>🗑️ Futa Kikapu</button>
             </div>
           </div>
-        ) : page === 'shops' ? (
-          /* MACHIMBO PAGE */
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-              <h2 style={{ margin: 0, fontSize: '20px', color: '#1e293b' }}>🏪 Machimbo</h2>
-              <button onClick={() => setPage('home')} style={{ background: '#f1f5f9', border: 'none', padding: '6px 12px', borderRadius: '20px', cursor: 'pointer', fontSize: '12px', color: '#1e293b' }}>← Nyumbani</button>
-            </div>
-            
-            <input type="text" placeholder="🔍 Tafuta machimbo..." value={shopSearchQuery} onChange={(e) => setShopSearchQuery(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '40px', border: '2px solid #e2e8f0', fontSize: '14px', outline: 'none', background: 'white', marginBottom: '16px' }} />
-            
-            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '16px' }}>
-              {categories.filter(c => c !== "Machimbo Yote").map(cat => (
-                <button key={cat} onClick={() => { setSelectedCategory(cat); setPage('home') }} style={{ padding: '6px 14px', borderRadius: '20px', border: '2px solid #e2e8f0', background: 'white', color: '#64748b', cursor: 'pointer', fontSize: '12px', whiteSpace: 'nowrap' }}>{cat}</button>
-              ))}
-            </div>
-            
-            {filteredShops.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px', background: 'white', borderRadius: '16px' }}>
-                <div style={{ fontSize: '50px', marginBottom: '16px' }}>🏪</div>
-                <p>Hakuna machimbo yaliyopatikana.</p>
-                <button onClick={() => setShowSellerAuth(true)} style={{ marginTop: '16px', padding: '8px 16px', background: '#f59e0b', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' }}>🏪 Jiunge Sasa</button>
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: shopsGridCols, gap: '16px' }}>
-                {filteredShops.map(shop => {
-                  const shopProductCount = products.filter(p => p.shop === shop.name).length
-                  return (
-                    <div key={shop.id} onClick={() => { setSelectedShop(shop); setPage('shopProfile') }} style={{ background: 'white', borderRadius: '16px', overflow: 'hidden', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
-                      <div style={{ height: '90px', background: 'linear-gradient(135deg, #f59e0b, #d97706)', position: 'relative' }}>
-                        <div style={{ position: 'absolute', bottom: '-25px', left: '50%', transform: 'translateX(-50%)', width: '60px', height: '60px', background: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.2)', border: '3px solid white' }}>
-                          {shop.logo ? <img src={shop.logo} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: '30px' }}>🏪</span>}
-                        </div>
-                      </div>
-                      <div style={{ padding: '35px 12px 12px 12px', textAlign: 'center' }}>
-                        <h3 style={{ margin: '0 0 6px', fontSize: '15px', fontWeight: 'bold', color: '#1e293b' }}>{shop.name.length > 25 ? shop.name.substring(0,25) + '...' : shop.name}</h3>
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '10px', color: '#f59e0b', background: '#fef3c7', padding: '2px 10px', borderRadius: '20px' }}>{shop.category || 'Machimbo'}</span>
-                          <span style={{ fontSize: '10px', color: '#10b981', background: '#ecfdf5', padding: '2px 10px', borderRadius: '20px' }}>⭐ {shop.rating || '4.5'}</span>
-                        </div>
-                        <p style={{ fontSize: '11px', color: '#64748b', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}><span>📍</span> {shop.location ? shop.location.substring(0, 25) : 'Kariakoo'}</p>
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', borderTop: '1px solid #e2e8f0', paddingTop: '10px' }}>
-                          <div><div style={{ fontSize: '16px', fontWeight: 'bold', color: '#f59e0b' }}>{shopProductCount}</div><div style={{ fontSize: '9px', color: '#64748b' }}>Bidhaa</div></div>
-                          <div><div style={{ fontSize: '16px', fontWeight: 'bold', color: '#25D366' }}>💬</div><div style={{ fontSize: '9px', color: '#64748b' }}>WhatsApp</div></div>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        ) : page === 'shopProfile' && selectedShop ? (
-          /* SHOP PROFILE PAGE */
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-              <button onClick={() => setPage('shops')} style={{ background: '#f1f5f9', border: 'none', padding: '6px 12px', borderRadius: '20px', cursor: 'pointer', fontSize: '12px', color: '#1e293b' }}>← Machimbo</button>
-              <button onClick={() => setPage('home')} style={{ background: '#f1f5f9', border: 'none', padding: '6px 12px', borderRadius: '20px', cursor: 'pointer', fontSize: '12px', color: '#1e293b' }}>🏠 Nyumbani</button>
-            </div>
-            
-            <div style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', borderRadius: '16px', padding: '16px', marginBottom: '20px', color: 'white' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                <div style={{ width: '70px', height: '70px', background: 'white', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}>
-                  {selectedShop.logo ? <img src={selectedShop.logo} alt={selectedShop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: '35px' }}>🏪</span>}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <h1 style={{ margin: '0 0 6px', fontSize: '18px', fontWeight: 'bold' }}>{selectedShop.name}</h1>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                    <span style={{ background: 'rgba(255,255,255,0.25)', padding: '3px 10px', borderRadius: '20px', fontSize: '10px' }}>{selectedShop.category || 'Machimbo'}</span>
-                    <span style={{ background: 'rgba(255,255,255,0.25)', padding: '3px 10px', borderRadius: '20px', fontSize: '10px' }}>⭐ {selectedShop.rating || '4.5'}</span>
-                  </div>
-                  <p style={{ margin: 0, fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}><span>📍</span> {selectedShop.location || 'Kariakoo, Dar es Salaam'}</p>
-                  <p style={{ margin: 0, fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}><span>📞</span> {selectedShop.phone || 'Namba haijajazwa'}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
-              <button onClick={() => window.open(`https://wa.me/${selectedShop.phone || '255700000000'}?text=Habari, nimeona machimbo yako kwenye Baizona. Ninataka kuulizia bidhaa zako.`, '_blank')} style={{ flex: 1, padding: '10px', background: '#25D366', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>💬 WhatsApp</button>
-              <button onClick={() => window.open(`tel:${selectedShop.phone || ''}`)} style={{ flex: 1, padding: '10px', background: '#6366f1', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>📞 Simu</button>
-            </div>
-            
-            <h2 style={{ fontSize: '18px', marginBottom: '12px', color: '#1e293b' }}>📦 Bidhaa za {selectedShop.name}</h2>
-            
-            {shopProducts.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px', background: 'white', borderRadius: '16px' }}><div style={{ fontSize: '40px', marginBottom: '12px' }}>📦</div><p>Hakuna bidhaa bado.</p></div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: gridCols, gap: '16px' }}>
-                {shopProducts.map(product => (
-                  <div key={product.id} onClick={() => { setSelectedProduct(product); setSelectedShop(selectedShop); setPage('productDetails') }} style={{ background: 'white', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
-                    <div style={{ height: '160px', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                      <img src={product.images?.[0] || product.image || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500'} alt={product.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                      {product.min_order_quantity > 1 && <div style={{ position: 'absolute', top: '5px', left: '5px', background: '#f59e0b', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '9px', fontWeight: 'bold' }}>MOQ: {product.min_order_quantity}</div>}
-                    </div>
-                    <div style={{ padding: '10px' }}>
-                      <h4 style={{ margin: '0 0 6px', fontSize: '13px', fontWeight: 'bold', color: '#1e293b' }}>{product.name.length > 30 ? product.name.substring(0,30) + '...' : product.name}</h4>
-                      <div><span style={{ fontSize: '16px', fontWeight: 'bold', color: '#f59e0b' }}>Tsh {product.price?.toLocaleString()}</span><span style={{ fontSize: '10px', color: '#64748b' }}>/{product.bulk_unit || 'pcs'}</span></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          /* HOME PAGE - Products Grid */
-          <>
-            <input type="text" placeholder="🔍 Tafuta bidhaa..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '40px', border: '2px solid #e2e8f0', fontSize: '14px', outline: 'none', background: 'white', marginBottom: '16px' }} />
-            
-            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '16px' }}>
-              {categories.map(cat => (
-                <button key={cat} onClick={() => setSelectedCategory(cat)} style={{ padding: '6px 14px', borderRadius: '20px', border: '2px solid', borderColor: selectedCategory === cat ? '#f59e0b' : '#e2e8f0', background: selectedCategory === cat ? '#fef3c7' : 'white', color: selectedCategory === cat ? '#f59e0b' : '#64748b', cursor: 'pointer', fontSize: '12px', fontWeight: selectedCategory === cat ? 'bold' : 'normal', whiteSpace: 'nowrap' }}>
-                  {cat === "Machimbo Yote" ? "🏭 Vyote" : cat}
-                </button>
-              ))}
-            </div>
-
-            {/* Products Grid - 3 columns on mobile */}
-            <div style={{ display: 'grid', gridTemplateColumns: gridCols, gap: '12px' }}>
-              {filteredProducts.map(product => {
-                const shop = getShop(product.shop)
-                return (
-                  <div key={product.id} onClick={() => { setSelectedProduct(product); setSelectedShop(shop); setPage('productDetails') }} style={{ background: 'white', borderRadius: '10px', overflow: 'hidden', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
-                    <div style={{ height: '140px', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                      <img src={product.images?.[0] || product.image || 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=500'} alt={product.name} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                      {product.images?.length > 1 && <div style={{ position: 'absolute', top: '3px', right: '3px', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '2px 5px', borderRadius: '8px', fontSize: '8px' }}>📷 {product.images.length}</div>}
-                      {product.min_order_quantity > 1 && <div style={{ position: 'absolute', top: '3px', left: '3px', background: '#f59e0b', color: 'white', padding: '2px 6px', borderRadius: '10px', fontSize: '8px', fontWeight: 'bold' }}>MOQ:{product.min_order_quantity}</div>}
-                    </div>
-                    <div style={{ padding: '8px' }}>
-                      <div style={{ fontSize: '9px', color: '#64748b', marginBottom: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>🏪 {product.shop}</div>
-                      <h3 style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: 'bold', color: '#1e293b', lineHeight: '1.3', height: '28px', overflow: 'hidden' }}>{product.name.length > 30 ? product.name.substring(0,28) + '..' : product.name}</h3>
-                      <div><span style={{ fontSize: '13px', fontWeight: 'bold', color: '#f59e0b' }}>Tsh {product.price?.toLocaleString()}</span><span style={{ fontSize: '8px', color: '#64748b' }}>/{product.bulk_unit || 'pcs'}</span></div>
-                      {product.variants?.length > 0 && <div style={{ fontSize: '8px', color: '#6366f1', marginTop: '3px' }}>🎨 +{product.variants.length}</div>}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </>
-        )}
-      </div>
-      
-      {/* BOTTOM NAVIGATION BAR - ONLY ON MOBILE */}
-      {isMobile && (
-        <div style={{ 
-          position: 'fixed', 
-          bottom: 0, 
-          left: 0, 
-          right: 0, 
-          background: 'white', 
-          borderTop: '1px solid #e2e8f0',
-          display: 'flex',
-          justifyContent: 'space-around',
-          alignItems: 'center',
-          padding: '8px 12px 12px 12px',
-          zIndex: 100,
-          boxShadow: '0 -2px 10px rgba(0,0,0,0.05)'
-        }}>
-          <button onClick={() => { setPage('home'); setShowCart(false) }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'none', border: 'none', cursor: 'pointer', color: page === 'home' && !showCart ? '#f59e0b' : '#64748b' }}>
-            <span style={{ fontSize: '22px' }}>🏠</span>
-            <span style={{ fontSize: '10px', fontWeight: page === 'home' ? 'bold' : 'normal' }}>Nyumbani</span>
-          </button>
-          <button onClick={() => { setPage('shops'); setShowCart(false) }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'none', border: 'none', cursor: 'pointer', color: page === 'shops' ? '#f59e0b' : '#64748b' }}>
-            <span style={{ fontSize: '22px' }}>🏪</span>
-            <span style={{ fontSize: '10px', fontWeight: page === 'shops' ? 'bold' : 'normal' }}>Machimbo</span>
-          </button>
-          <button onClick={() => setShowCart(true)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'none', border: 'none', cursor: 'pointer', color: showCart ? '#f59e0b' : '#64748b', position: 'relative' }}>
-            <span style={{ fontSize: '22px' }}>🛒</span>
-            {getTotalItems() > 0 && <span style={{ position: 'absolute', top: '-5px', right: '5px', background: '#ef4444', color: 'white', fontSize: '10px', borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{getTotalItems()}</span>}
-            <span style={{ fontSize: '10px', fontWeight: showCart ? 'bold' : 'normal' }}>Kikapu</span>
-          </button>
-          <button onClick={() => setShowSellerAuth(true)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
-            <span style={{ fontSize: '22px' }}>🏪</span>
-            <span style={{ fontSize: '10px' }}>Kuuza</span>
-          </button>
         </div>
-      )}
-      
-      <style>{`@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }`}</style>
+      </div>
     </div>
   )
 }
 
-export default App
+// MAIN APP
+export default function App() {
+  const [products, setProducts] = useState(SAMPLE_PRODUCTS)
+  const [shops, setShops] = useState(SAMPLE_SHOPS)
+  const [agizaChinaCompanies, setAgizaChinaCompanies] = useState(SAMPLE_AGIZA_CHINA_COMPANIES)
+  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [productSearchQuery, setProductSearchQuery] = useState("")
+  const [shopSearchQuery, setShopSearchQuery] = useState("")
+  const [agizaChinaSearchQuery, setAgizaChinaSearchQuery] = useState("")
+  const [showCart, setShowCart] = useState(false)
+  const [currentPage, setCurrentPage] = useState("home")
+  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [selectedShop, setSelectedShop] = useState(null)
+  const [selectedAgizaChinaCompany, setSelectedAgizaChinaCompany] = useState(null)
+  const [cartBounce, setCartBounce] = useState(false)
+  const [showCheckoutModal, setShowCheckoutModal] = useState(null)
+  const [pendingDirectOrder, setPendingDirectOrder] = useState(null)
+  const [recentlyViewed, setRecentlyViewed] = useState([])
+
+  const { items, addItem, getTotalItems } = useCartStore()
+
+  // Load recently viewed
+  useEffect(() => {
+    const saved = localStorage.getItem("baizona_recently_viewed")
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        const validProducts = parsed.filter(p => products.some(prod => prod.id === p.id))
+        setRecentlyViewed(validProducts)
+      } catch(e) {}
+    }
+  }, [products])
+
+  useEffect(() => {
+    if (recentlyViewed.length > 0) {
+      localStorage.setItem("baizona_recently_viewed", JSON.stringify(recentlyViewed.slice(0, 8)))
+    }
+  }, [recentlyViewed])
+
+  useEffect(() => {
+    if (getTotalItems() > 0) {
+      setCartBounce(true)
+      setTimeout(() => setCartBounce(false), 500)
+    }
+  }, [getTotalItems()])
+
+  // Filter products
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = productSearchQuery === "" || 
+      p.name?.toLowerCase().includes(productSearchQuery.toLowerCase()) || 
+      p.shop?.toLowerCase().includes(productSearchQuery.toLowerCase())
+    const matchesCategory = selectedCategory === "all" || p.category === selectedCategory
+    return matchesSearch && matchesCategory
+  })
+
+  // Filter shops
+  const filteredShops = shops.filter(s => {
+    return shopSearchQuery === "" || 
+      s.name?.toLowerCase().includes(shopSearchQuery.toLowerCase()) ||
+      s.location?.toLowerCase().includes(shopSearchQuery.toLowerCase()) ||
+      s.category?.toLowerCase().includes(shopSearchQuery.toLowerCase())
+  })
+
+  // Filter Agiza China companies
+  const filteredAgizaChina = agizaChinaCompanies.filter(c => {
+    return agizaChinaSearchQuery === "" || 
+      c.name?.toLowerCase().includes(agizaChinaSearchQuery.toLowerCase()) ||
+      c.location?.toLowerCase().includes(agizaChinaSearchQuery.toLowerCase())
+  })
+
+  // Trending products
+  const trendingProducts = [...products].sort((a, b) => b.sold - a.sold).slice(0, 8)
+
+  const handleAddToCart = (product, quantity = 1) => {
+    vibrate()
+    addItem({
+      id: product.id, name: product.name, price: product.price, quantity: quantity,
+      image: product.image, sellerName: product.shop, sellerPhone: product.sellerPhone || "255700000000",
+      unit: product.bulk_unit, min_order_quantity: product.min_order_quantity
+    })
+    showToast(`✅ ${product.name} imeongezwa kwenye kikapu!`)
+    setCurrentPage("home")
+  }
+
+  const handleDirectOrder = (product, quantity) => {
+    const total = product.price * quantity
+    setPendingDirectOrder({ product, quantity, total })
+    setShowCheckoutModal(true)
+  }
+
+  const handleConfirmDirectOrder = (customer) => {
+    if (!customer.name || !customer.phone) {
+      showToast("❌ Tafadhali jaza jina na namba ya simu!", "error")
+      return
+    }
+    
+    const { product, quantity, total } = pendingDirectOrder
+    const message = `🏪 *AGIZO KUTOKA BAIZONA - CHIMBO LA MACHIMBO*\n\n` +
+      `*Bidhaa:* ${product.name}\n` +
+      `*Duka:* ${product.shop}\n` +
+      `*Kiasi:* ${quantity} ${product.bulk_unit}\n` +
+      `*Bei kwa kipande:* Tsh ${fmt(product.price)}\n` +
+      `*Jumla:* Tsh ${fmt(total)}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `*MAELEZO YA MNUNUZI:*\n` +
+      `👤 *Jina:* ${customer.name}\n` +
+      `📞 *Simu:* ${customer.phone}\n` +
+      `📍 *Anwani:* ${customer.address || "Hajajaza anwani"}\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `Asante kwa kununua kwa jumla! 🙏`
+    
+    window.open(`https://wa.me/${product.sellerPhone || "255700000000"}?text=${encodeURIComponent(message)}`, "_blank")
+    showToast(`✅ Agizo lako limetumwa kwa ${product.shop}!`, "success")
+    setShowCheckoutModal(false)
+    setPendingDirectOrder(null)
+  }
+
+  const handleViewProduct = (product) => {
+    setRecentlyViewed(prev => {
+      const filtered = prev.filter(p => p.id !== product.id)
+      return [product, ...filtered].slice(0, 8)
+    })
+    setSelectedProduct(product)
+    setCurrentPage("productDetails")
+  }
+
+  const handleViewShop = (shop) => {
+    setSelectedShop(shop)
+    setCurrentPage("shopDetails")
+  }
+
+  const handleViewAgizaChinaCompany = (company) => {
+    setSelectedAgizaChinaCompany(company)
+    setCurrentPage("agizaChinaDetails")
+  }
+
+  // Get products for selected shop
+  const shopProducts = selectedShop ? products.filter(p => p.shop === selectedShop.name) : []
+
+  if (showCart) return <CartPage onClose={() => setShowCart(false)} />
+  
+  if (currentPage === "productDetails" && selectedProduct) {
+    return (
+      <>
+        <CheckoutModal isOpen={showCheckoutModal} onClose={() => setShowCheckoutModal(false)} onConfirm={handleConfirmDirectOrder} sellerName={pendingDirectOrder?.product?.shop} total={pendingDirectOrder?.total} />
+        <ProductDetailsPage 
+          product={selectedProduct} 
+          onAddToCart={handleAddToCart} 
+          onDirectOrder={handleDirectOrder} 
+          onBack={() => { setCurrentPage("home"); setSelectedProduct(null) }} 
+          onViewProduct={handleViewProduct}
+          allProducts={products}
+        />
+      </>
+    )
+  }
+
+  if (currentPage === "shopDetails" && selectedShop) {
+    return (
+      <ShopDetailsPage 
+        shop={selectedShop} 
+        shopProducts={shopProducts}
+        onBack={() => { setCurrentPage("shops"); setSelectedShop(null) }}
+        onViewProduct={handleViewProduct}
+      />
+    )
+  }
+
+  if (currentPage === "agizaChinaDetails" && selectedAgizaChinaCompany) {
+    return (
+      <AgizaChinaDetailsPage 
+        company={selectedAgizaChinaCompany}
+        onBack={() => { setCurrentPage("agizaChina"); setSelectedAgizaChinaCompany(null) }}
+        onViewProduct={handleViewProduct}
+      />
+    )
+  }
+
+  // AGIZA CHINA PAGE
+  if (currentPage === "agizaChina") {
+    return (
+      <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#ffffff", minHeight: "100vh" }}>
+        <style>{`
+          @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        `}</style>
+
+        <div style={{ background: "#fafafa", borderBottom: "1px solid #eee", padding: "8px 0" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px", display: "flex", justifyContent: "space-between", color: "#666", fontSize: "12px" }}>
+            <div style={{ display: "flex", gap: "20px" }}><span>🏪 Baizona.com</span><span>📞 +255 698 656 019</span><span>✉️ info@baizona.com</span></div>
+            <div style={{ display: "flex", gap: "20px" }}><span>🇹🇿 Tanzania</span></div>
+          </div>
+        </div>
+
+        <div style={{ background: "white", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", position: "sticky", top: 0, zIndex: 100 }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "15px 20px", display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap" }}>
+            <div onClick={() => { setCurrentPage("home"); setSelectedCategory("all"); setProductSearchQuery("") }} style={{ cursor: "pointer" }}>
+              <div style={{ fontSize: "24px", fontWeight: "bold", color: "#ff6b00" }}>BAIZONA</div>
+              <div style={{ fontSize: "10px", color: "#999", letterSpacing: "1px" }}>CHIMBO LA MACHIMBO</div>
+            </div>
+            
+            <div style={{ flex: 1, maxWidth: "400px", position: "relative" }}>
+              <input 
+                type="text" 
+                placeholder="🔍 Tafuta kampuni, huduma..." 
+                value={agizaChinaSearchQuery}
+                onChange={e => setAgizaChinaSearchQuery(e.target.value)}
+                style={{ width: "100%", padding: "10px 15px", border: "2px solid #ff6b00", borderRadius: "30px", fontSize: "13px", outline: "none" }} 
+              />
+            </div>
+            
+            <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+              <button onClick={() => { setCurrentPage("home"); setSelectedCategory("all"); setProductSearchQuery("") }} style={{ background: "none", border: "none", color: "#333", cursor: "pointer", fontWeight: "500" }}>🏠 Nyumbani</button>
+              <button onClick={() => { setCurrentPage("shops"); setShopSearchQuery("") }} style={{ background: "none", border: "none", color: "#333", cursor: "pointer", fontWeight: "500" }}>🏪 Machimbo</button>
+              <button onClick={() => { setCurrentPage("agizaChina"); setAgizaChinaSearchQuery("") }} style={{ background: "none", border: "none", color: "#ff6b00", fontWeight: "bold", cursor: "pointer" }}>🇨🇳 Agiza China</button>
+            </div>
+            
+            <div onClick={() => setShowCart(true)} style={{ cursor: "pointer", position: "relative" }}>
+              <span style={{ fontSize: "24px" }}>🛒</span>
+              {getTotalItems() > 0 && <span style={{ position: "absolute", top: "-6px", right: "-10px", background: "#ff6b00", color: "white", fontSize: "10px", borderRadius: "50%", width: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
+              <div style={{ fontSize: "10px", color: "#666" }}>Kikapu</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ maxWidth: "1200px", margin: "40px auto", padding: "0 20px" }}>
+          <div style={{ marginBottom: "30px", textAlign: "center" }}>
+            <h1 style={{ fontSize: "36px", color: "#333", marginBottom: "10px" }}>🇨🇳 Agiza Kutoka China</h1>
+            <p style={{ color: "#666", fontSize: "16px" }}>Kampuni za Tanzania zinazokusaidia kuagiza bidhaa kutoka China</p>
+          </div>
+
+          {filteredAgizaChina.map(company => (
+            <AgizaChinaCard 
+              key={company.id} 
+              company={company} 
+              onClick={() => handleViewAgizaChinaCompany(company)}
+              onViewProduct={handleViewProduct}
+            />
+          ))}
+
+          {filteredAgizaChina.length === 0 && (
+            <div style={{ textAlign: "center", padding: "60px" }}>
+              <div style={{ fontSize: "60px", marginBottom: "20px" }}>🇨🇳</div>
+              <h3 style={{ color: "#333" }}>Hakuna kampuni zilizopatikana</h3>
+            </div>
+          )}
+        </div>
+
+        <footer style={{ background: "#1a1a2e", color: "#fff", marginTop: "60px", padding: "40px 0 20px", textAlign: "center" }}>
+          <p style={{ color: "#888", fontSize: "12px" }}>© 2024 Baizona.com - Chimbo la Machimbo Tanzania</p>
+        </footer>
+      </div>
+    )
+  }
+
+  // MAIN HOME PAGE
+  if (currentPage === "home") {
+    return (
+      <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#ffffff", minHeight: "100vh" }}>
+        <style>{`
+          @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+          @keyframes bounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+          .cart-bounce { animation: bounce 0.5s ease; }
+        `}</style>
+
+        <div style={{ background: "#fafafa", borderBottom: "1px solid #eee", padding: "8px 0" }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px", display: "flex", justifyContent: "space-between", color: "#666", fontSize: "12px" }}>
+            <div style={{ display: "flex", gap: "20px" }}><span>🏪 Baizona.com</span><span>📞 +255 698 656 019</span><span>✉️ info@baizona.com</span></div>
+            <div style={{ display: "flex", gap: "20px" }}><span>🇹🇿 Tanzania</span></div>
+          </div>
+        </div>
+
+        <div style={{ background: "white", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", position: "sticky", top: 0, zIndex: 100 }}>
+          <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "15px 20px", display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap" }}>
+            <div onClick={() => { setCurrentPage("home"); setSelectedCategory("all"); setProductSearchQuery("") }} style={{ cursor: "pointer" }}>
+              <div style={{ fontSize: "24px", fontWeight: "bold", color: "#ff6b00" }}>BAIZONA</div>
+              <div style={{ fontSize: "10px", color: "#999", letterSpacing: "1px" }}>CHIMBO LA MACHIMBO</div>
+            </div>
+            
+            <div style={{ flex: 1, maxWidth: "500px", position: "relative" }}>
+              <input 
+                type="text" 
+                placeholder="🔍 Tafuta bidhaa, brand, au duka..." 
+                value={productSearchQuery}
+                onChange={e => setProductSearchQuery(e.target.value)}
+                style={{ width: "100%", padding: "12px 18px", border: "2px solid #ff6b00", borderRadius: "30px", fontSize: "14px", outline: "none" }} 
+              />
+              <button style={{ position: "absolute", right: "5px", top: "5px", bottom: "5px", background: "#ff6b00", border: "none", padding: "0 20px", borderRadius: "30px", color: "white", cursor: "pointer" }}>🔍 Tafuta</button>
+            </div>
+            
+            <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+              <button onClick={() => { setCurrentPage("home"); setSelectedCategory("all"); setProductSearchQuery("") }} style={{ background: "none", border: "none", color: "#ff6b00", fontWeight: "bold", cursor: "pointer" }}>🏠 Nyumbani</button>
+              <button onClick={() => { setCurrentPage("shops"); setShopSearchQuery("") }} style={{ background: "none", border: "none", color: "#333", cursor: "pointer" }}>🏪 Machimbo</button>
+              <button onClick={() => { setCurrentPage("agizaChina"); setAgizaChinaSearchQuery("") }} style={{ background: "none", border: "none", color: "#333", cursor: "pointer" }}>🇨🇳 Agiza China</button>
+            </div>
+            
+            <div onClick={() => setShowCart(true)} style={{ cursor: "pointer", position: "relative" }}>
+              <span style={{ fontSize: "26px" }} className={cartBounce ? "cart-bounce" : ""}>🛒</span>
+              {getTotalItems() > 0 && <span style={{ position: "absolute", top: "-8px", right: "-12px", background: "#ff6b00", color: "white", fontSize: "10px", borderRadius: "50%", width: "20px", height: "20px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
+              <div style={{ fontSize: "11px", color: "#666" }}>Kikapu</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ maxWidth: "1200px", margin: "40px auto", padding: "0 20px" }}>
+          <h2 style={{ color: "#333", marginBottom: "24px", fontSize: "22px", fontWeight: "bold" }}>📂 Kategoria za Bidhaa</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px" }}>
+            {PRODUCT_CATEGORIES.map((cat) => (
+              <div 
+                key={cat.id} 
+                onClick={() => setSelectedCategory(cat.id)}
+                style={{
+                  background: selectedCategory === cat.id ? cat.color : "white",
+                  borderRadius: "16px", padding: "24px 20px", cursor: "pointer",
+                  transition: "all 0.3s ease", textAlign: "center",
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+                  border: selectedCategory === cat.id ? "none" : "1px solid #eee"
+                }}
+              >
+                <div style={{ fontSize: "48px", marginBottom: "12px" }}>{cat.icon}</div>
+                <div style={{ fontSize: "18px", fontWeight: "bold", color: selectedCategory === cat.id ? "white" : "#333", marginBottom: "8px" }}>{cat.name}</div>
+                <div style={{ fontSize: "12px", color: selectedCategory === cat.id ? "rgba(255,255,255,0.8)" : "#888" }}>{cat.description}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ maxWidth: "1200px", margin: "40px auto", padding: "0 20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+            <span style={{ fontSize: "28px" }}>🔥</span>
+            <h2 style={{ color: "#333", fontSize: "22px", fontWeight: "bold" }}>Bidhaa Zinazoagizwa Sana</h2>
+          </div>
+          <div style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "10px" }}>
+            {trendingProducts.map(product => (
+              <div key={product.id} style={{ minWidth: "200px" }}>
+                <SmallProductCard product={product} onClick={() => handleViewProduct(product)} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {recentlyViewed.length > 0 && (
+          <div style={{ maxWidth: "1200px", margin: "40px auto", padding: "0 20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+              <span style={{ fontSize: "28px" }}>⏱️</span>
+              <h2 style={{ color: "#333", fontSize: "22px", fontWeight: "bold" }}>Ulitazama Hivi Karibuni</h2>
+            </div>
+            <div style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "10px" }}>
+              {recentlyViewed.map(product => (
+                <div key={product.id} style={{ minWidth: "200px" }}>
+                  <SmallProductCard product={product} onClick={() => handleViewProduct(product)} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div style={{ maxWidth: "1200px", margin: "40px auto", padding: "0 20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+            <h2 style={{ color: "#333", fontSize: "22px", fontWeight: "bold" }}>
+              {selectedCategory === "all" ? "✨ Bidhaa Zote" : PRODUCT_CATEGORIES.find(c => c.id === selectedCategory)?.name}
+            </h2>
+            <span style={{ color: "#888", fontSize: "14px" }}>📦 {filteredProducts.length} bidhaa</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px" }}>
+            {filteredProducts.map((product, idx) => (
+              <ProductCard key={product.id} product={product} onClick={() => handleViewProduct(product)} index={idx} />
+            ))}
+          </div>
+        </div>
+
+        <footer style={{ background: "#1a1a2e", color: "#fff", marginTop: "60px", padding: "40px 0 20px", textAlign: "center" }}>
+          <p style={{ color: "#888", fontSize: "12px" }}>© 2024 Baizona.com - Chimbo la Machimbo Tanzania</p>
+        </footer>
+      </div>
+    )
+  }
+
+  // SHOPS PAGE
+  return (
+    <div style={{ fontFamily: "Inter, system-ui, sans-serif", background: "#ffffff", minHeight: "100vh" }}>
+      <div style={{ background: "#fafafa", borderBottom: "1px solid #eee", padding: "8px 0" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px", display: "flex", justifyContent: "space-between", color: "#666", fontSize: "12px" }}>
+          <div style={{ display: "flex", gap: "20px" }}><span>🏪 Baizona.com</span><span>📞 +255 698 656 019</span><span>✉️ info@baizona.com</span></div>
+          <div style={{ display: "flex", gap: "20px" }}><span>🇹🇿 Tanzania</span></div>
+        </div>
+      </div>
+
+      <div style={{ background: "white", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "15px 20px", display: "flex", alignItems: "center", gap: "20px", flexWrap: "wrap" }}>
+          <div onClick={() => { setCurrentPage("home"); setSelectedCategory("all"); setProductSearchQuery("") }} style={{ cursor: "pointer" }}>
+            <div style={{ fontSize: "24px", fontWeight: "bold", color: "#ff6b00" }}>BAIZONA</div>
+            <div style={{ fontSize: "10px", color: "#999", letterSpacing: "1px" }}>CHIMBO LA MACHIMBO</div>
+          </div>
+          
+          <div style={{ flex: 1, maxWidth: "500px", position: "relative" }}>
+            <input 
+              type="text" 
+              placeholder="🔍 Tafuta machimbo, duka, brand, au mahali..." 
+              value={shopSearchQuery}
+              onChange={e => setShopSearchQuery(e.target.value)}
+              style={{ width: "100%", padding: "12px 18px", border: "2px solid #ff6b00", borderRadius: "30px", fontSize: "14px", outline: "none" }} 
+            />
+            <button style={{ position: "absolute", right: "5px", top: "5px", bottom: "5px", background: "#ff6b00", border: "none", padding: "0 20px", borderRadius: "30px", color: "white", cursor: "pointer" }}>🔍 Tafuta</button>
+          </div>
+          
+          <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+            <button onClick={() => { setCurrentPage("home"); setSelectedCategory("all"); setProductSearchQuery("") }} style={{ background: "none", border: "none", color: "#333", cursor: "pointer" }}>🏠 Nyumbani</button>
+            <button onClick={() => { setCurrentPage("shops"); setShopSearchQuery("") }} style={{ background: "none", border: "none", color: "#ff6b00", fontWeight: "bold", cursor: "pointer" }}>🏪 Machimbo</button>
+            <button onClick={() => { setCurrentPage("agizaChina"); setAgizaChinaSearchQuery("") }} style={{ background: "none", border: "none", color: "#333", cursor: "pointer" }}>🇨🇳 Agiza China</button>
+          </div>
+          
+          <div onClick={() => setShowCart(true)} style={{ cursor: "pointer", position: "relative" }}>
+            <span style={{ fontSize: "26px" }}>🛒</span>
+            {getTotalItems() > 0 && <span style={{ position: "absolute", top: "-8px", right: "-12px", background: "#ff6b00", color: "white", fontSize: "10px", borderRadius: "50%", width: "20px", height: "20px", display: "flex", alignItems: "center", justifyContent: "center" }}>{getTotalItems()}</span>}
+            <div style={{ fontSize: "11px", color: "#666" }}>Kikapu</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: "1200px", margin: "40px auto", padding: "0 20px" }}>
+        <div style={{ marginBottom: "30px", textAlign: "center" }}>
+          <h1 style={{ fontSize: "36px", color: "#333", marginBottom: "10px" }}>🏪 Machimbo Tanzania</h1>
+          <p style={{ color: "#666", fontSize: "16px" }}>Wauzaji wa uhakika wa bidhaa za jumla nchini Tanzania</p>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
+          {filteredShops.map(shop => (
+            <ShopCard key={shop.id} shop={shop} onClick={() => handleViewShop(shop)} />
+          ))}
+        </div>
+
+        {filteredShops.length === 0 && (
+          <div style={{ textAlign: "center", padding: "60px" }}>
+            <div style={{ fontSize: "60px", marginBottom: "20px" }}>🏪</div>
+            <h3 style={{ color: "#333" }}>Hakuna machimbo yaliyopatikana</h3>
+          </div>
+        )}
+      </div>
+
+      <footer style={{ background: "#1a1a2e", color: "#fff", marginTop: "60px", padding: "40px 0 20px", textAlign: "center" }}>
+        <p style={{ color: "#888", fontSize: "12px" }}>© 2024 Baizona.com - Chimbo la Machimbo Tanzania</p>
+      </footer>
+    </div>
+  )
+}
